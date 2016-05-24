@@ -1,0 +1,3 @@
+[submodule "clang"]
+	path = tools/clang
+	url = http://llvm.org/git/clang.git

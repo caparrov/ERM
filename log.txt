@@ -1,0 +1,593 @@
+------------------------------------------------------------------------
+r4553 | caparrov | 2014-06-10 14:26:32 +0200 (Tue, 10 Jun 2014) | 1 line
+
+[ADDED] Bottlenecks and Print performance
+------------------------------------------------------------------------
+r4548 | caparrov | 2014-06-08 18:16:40 +0200 (Sun, 08 Jun 2014) | 1 line
+
+[ADDED] Bottleneck Analysis
+------------------------------------------------------------------------
+r4547 | caparrov | 2014-06-08 00:47:58 +0200 (Sun, 08 Jun 2014) | 1 line
+
+Started modification for printing bottlenecks
+------------------------------------------------------------------------
+r4546 | caparrov | 2014-06-07 17:17:59 +0200 (Sat, 07 Jun 2014) | 1 line
+
+[FIXED] Prefetch when L1 access
+------------------------------------------------------------------------
+r4545 | caparrov | 2014-06-07 16:58:31 +0200 (Sat, 07 Jun 2014) | 1 line
+
+[DELETED] Debug comments
+------------------------------------------------------------------------
+r4544 | caparrov | 2014-06-07 12:11:21 +0200 (Sat, 07 Jun 2014) | 1 line
+
+Rolled back to r4403
+------------------------------------------------------------------------
+r4541 | caparrov | 2014-06-06 10:36:36 +0200 (Fri, 06 Jun 2014) | 1 line
+
+[ADDED] Print out configuraion
+------------------------------------------------------------------------
+r4540 | caparrov | 2014-06-06 09:52:49 +0200 (Fri, 06 Jun 2014) | 1 line
+
+
+------------------------------------------------------------------------
+r4539 | caparrov | 2014-06-05 21:06:57 +0200 (Thu, 05 Jun 2014) | 1 line
+
+[MODIFIED] Some files (Execution, Interpreter, ExternalFunctions) that were removed after the udpate
+------------------------------------------------------------------------
+r4533 | caparrov | 2014-06-01 13:06:32 +0200 (Sun, 01 Jun 2014) | 1 line
+
+[UPDATED] to last llvm-git
+------------------------------------------------------------------------
+r4520 | caparrov | 2014-05-30 18:08:06 +0200 (Fri, 30 May 2014) | 1 line
+
+
+------------------------------------------------------------------------
+r4403 | caparrov | 2014-04-25 08:39:07 +0200 (Fri, 25 Apr 2014) | 1 line
+
+Before git update
+------------------------------------------------------------------------
+r4113 | caparrov | 2014-03-05 16:36:36 +0100 (Wed, 05 Mar 2014) | 1 line
+
+[FIXED] WarmCache in Execution.cpp
+------------------------------------------------------------------------
+r4093 | caparrov | 2014-02-27 16:03:45 +0100 (Thu, 27 Feb 2014) | 1 line
+
+[FIXED] IntrinsicLowering.cpp - But not finished
+------------------------------------------------------------------------
+r4092 | caparrov | 2014-02-27 10:18:15 +0100 (Thu, 27 Feb 2014) | 1 line
+
+[] Seg fault for some vector code... Mac?
+------------------------------------------------------------------------
+r4075 | caparrov | 2014-02-23 22:25:10 +0100 (Sun, 23 Feb 2014) | 1 line
+
+[WORKING] Adding Shuffles
+------------------------------------------------------------------------
+r4064 | caparrov | 2014-02-19 15:10:28 +0100 (Wed, 19 Feb 2014) | 1 line
+
+[FIXED] DynamicAnalysis.cpp - Infinite loop in some situations
+------------------------------------------------------------------------
+r4052 | caparrov | 2014-02-13 20:49:00 +0100 (Thu, 13 Feb 2014) | 1 line
+
+[WORKING] Replacing x86 intrinsics.... 
+------------------------------------------------------------------------
+r4050 | caparrov | 2014-02-12 14:44:29 +0100 (Wed, 12 Feb 2014) | 1 line
+
+[FIXED] Prefetch and vector code 
+------------------------------------------------------------------------
+r4048 | caparrov | 2014-02-11 19:06:11 +0100 (Tue, 11 Feb 2014) | 1 line
+
+[WORKING]
+------------------------------------------------------------------------
+r4043 | caparrov | 2014-02-06 18:56:08 +0100 (Thu, 06 Feb 2014) | 1 line
+
+[WORK IN PROGRESS] Vector code
+------------------------------------------------------------------------
+r4041 | caparrov | 2014-02-05 14:25:43 +0100 (Wed, 05 Feb 2014) | 1 line
+
+[UPDATED] Prefetcher
+------------------------------------------------------------------------
+r4036 | caparrov | 2014-01-30 18:02:30 +0100 (Thu, 30 Jan 2014) | 1 line
+
+[MODIFIED] Prefetcher - account for separate occupacies
+------------------------------------------------------------------------
+r4031 | caparrov | 2014-01-29 14:32:28 +0100 (Wed, 29 Jan 2014) | 1 line
+
+[DELETED] Extra files in tools/lto
+------------------------------------------------------------------------
+r4027 | caparrov | 2014-01-28 14:10:52 +0100 (Tue, 28 Jan 2014) | 1 line
+
+[UPDATED] LLVM and CLANG
+------------------------------------------------------------------------
+r4023 | caparrov | 2014-01-28 11:12:50 +0100 (Tue, 28 Jan 2014) | 1 line
+
+Before starting modifications for vector
+------------------------------------------------------------------------
+r4016 | caparrov | 2014-01-22 10:43:41 +0100 (Wed, 22 Jan 2014) | 1 line
+
+[UPDATED] LLVM
+------------------------------------------------------------------------
+r4003 | caparrov | 2014-01-20 08:26:52 +0100 (Mon, 20 Jan 2014) | 1 line
+
+[REMOVED] Debug prefetcher comment
+------------------------------------------------------------------------
+r3999 | caparrov | 2014-01-17 15:25:20 +0100 (Fri, 17 Jan 2014) | 1 line
+
+[ADDED] Check for overlap percentage
+------------------------------------------------------------------------
+r3995 | caparrov | 2014-01-17 12:20:15 +0100 (Fri, 17 Jan 2014) | 1 line
+
+[FIXED] A bug in calculating span
+------------------------------------------------------------------------
+r3994 | caparrov | 2014-01-17 11:55:29 +0100 (Fri, 17 Jan 2014) | 1 line
+
+[FIXED] Print with and without merging arithmetic ops without option and rerunning
+------------------------------------------------------------------------
+r3991 | caparrov | 2014-01-17 09:34:01 +0100 (Fri, 17 Jan 2014) | 1 line
+
+[ADDED] Simple Spatial Prefetcher
+------------------------------------------------------------------------
+r3989 | caparrov | 2014-01-16 18:45:08 +0100 (Thu, 16 Jan 2014) | 1 line
+
+[FIXES] for in-order-execution and buffers set to infinity
+------------------------------------------------------------------------
+r3983 | caparrov | 2014-01-15 18:24:45 +0100 (Wed, 15 Jan 2014) | 1 line
+
+[In progress...] Resources to infinity
+------------------------------------------------------------------------
+r3961 | caparrov | 2014-01-11 17:44:39 +0100 (Sat, 11 Jan 2014) | 1 line
+
+[FIXED] Merge adds and mults
+------------------------------------------------------------------------
+r3960 | caparrov | 2014-01-11 15:06:52 +0100 (Sat, 11 Jan 2014) | 1 line
+
+[IN PROGRES..] Merge adds and mults
+------------------------------------------------------------------------
+r3954 | caparrov | 2014-01-08 18:14:16 +0100 (Wed, 08 Jan 2014) | 1 line
+
+[FIXED] Warm cache - The source code must execute twice the function
+------------------------------------------------------------------------
+r3953 | caparrov | 2014-01-08 16:40:00 +0100 (Wed, 08 Jan 2014) | 1 line
+
+Several changes to execution stack to handle warm cache
+------------------------------------------------------------------------
+r3886 | caparrov | 2013-12-11 08:39:45 +0100 (Wed, 11 Dec 2013) | 1 line
+
+[FIXED] Reset IssueCycleFranularity to one
+------------------------------------------------------------------------
+r3875 | caparrov | 2013-12-08 20:16:06 +0100 (Sun, 08 Dec 2013) | 1 line
+
+[FIXED] Division and no restriction on issue cycle
+------------------------------------------------------------------------
+r3874 | caparrov | 2013-12-06 09:17:02 +0100 (Fri, 06 Dec 2013) | 1 line
+
+[FIXED] Incompatible types
+------------------------------------------------------------------------
+r3873 | caparrov | 2013-12-06 09:15:23 +0100 (Fri, 06 Dec 2013) | 1 line
+
+[FIXED] Incompatible types
+------------------------------------------------------------------------
+r3872 | caparrov | 2013-12-06 09:12:14 +0100 (Fri, 06 Dec 2013) | 1 line
+
+[FIXED] Incompatible types
+------------------------------------------------------------------------
+r3871 | caparrov | 2013-12-05 20:53:32 +0100 (Thu, 05 Dec 2013) | 1 line
+
+[MODIFIED] Dynamic Analysis: FP_DIV, stats corrected
+------------------------------------------------------------------------
+r3838 | caparrov | 2013-11-20 16:35:20 +0100 (Wed, 20 Nov 2013) | 1 line
+
+[FIXED] Deleted debug comment always printing
+------------------------------------------------------------------------
+r3837 | caparrov | 2013-11-20 15:29:11 +0100 (Wed, 20 Nov 2013) | 1 line
+
+[FIXED] ResourceIssue-Stall span when no stalls
+------------------------------------------------------------------------
+r3836 | caparrov | 2013-11-20 15:09:02 +0100 (Wed, 20 Nov 2013) | 1 line
+
+[FIXED]  Cycle in which L1 loads can be issued
+------------------------------------------------------------------------
+r3835 | caparrov | 2013-11-20 14:06:44 +0100 (Wed, 20 Nov 2013) | 1 line
+
+[FIXED] Memory model
+------------------------------------------------------------------------
+r3834 | caparrov | 2013-11-20 10:22:47 +0100 (Wed, 20 Nov 2013) | 1 line
+
+[ADDED] x86 Memory ordering
+------------------------------------------------------------------------
+r3833 | caparrov | 2013-11-19 10:10:23 +0100 (Tue, 19 Nov 2013) | 1 line
+
+COMMIT after paper
+------------------------------------------------------------------------
+r3659 | caparrov | 2013-10-17 13:21:39 +0200 (Thu, 17 Oct 2013) | 1 line
+
+
+------------------------------------------------------------------------
+r3658 | caparrov | 2013-10-17 13:19:58 +0200 (Thu, 17 Oct 2013) | 1 line
+
+
+------------------------------------------------------------------------
+r3654 | caparrov | 2013-10-17 10:56:43 +0200 (Thu, 17 Oct 2013) | 1 line
+
+No issues locally
+------------------------------------------------------------------------
+r3653 | caparrov | 2013-10-17 10:31:26 +0200 (Thu, 17 Oct 2013) | 1 line
+
+[FIXED] LastIssueCycle of RS and Issue granularity from r3510
+------------------------------------------------------------------------
+r3647 | caparrov | 2013-10-17 02:24:10 +0200 (Thu, 17 Oct 2013) | 1 line
+
+[FIXED] LastIssueCycle and RS_STALL count wrong
+------------------------------------------------------------------------
+r3646 | caparrov | 2013-10-17 02:09:48 +0200 (Thu, 17 Oct 2013) | 1 line
+
+[FIXED] LastIssueCycle and RS_STALL count wrong
+------------------------------------------------------------------------
+r3645 | caparrov | 2013-10-17 02:04:55 +0200 (Thu, 17 Oct 2013) | 1 line
+
+[FIXED] LastIssueCycle and RS_STALL count wrong
+------------------------------------------------------------------------
+r3644 | caparrov | 2013-10-17 01:10:09 +0200 (Thu, 17 Oct 2013) | 1 line
+
+[FIXED] LastIssueCycle and RS_STALL count wrong
+------------------------------------------------------------------------
+r3643 | caparrov | 2013-10-17 01:06:23 +0200 (Thu, 17 Oct 2013) | 1 line
+
+[FIXED] LastIssueCycle and RS_STALL count wrong
+------------------------------------------------------------------------
+r3642 | caparrov | 2013-10-17 00:19:40 +0200 (Thu, 17 Oct 2013) | 1 line
+
+[FIXED] LastIssueCycle in CalculateGroupSpan
+------------------------------------------------------------------------
+r3510 | caparrov | 2013-10-03 12:45:43 +0200 (Thu, 03 Oct 2013) | 1 line
+
+[FIXED] Report MUL+ADD together - also issue span
+------------------------------------------------------------------------
+r3509 | caparrov | 2013-10-03 12:45:24 +0200 (Thu, 03 Oct 2013) | 1 line
+
+[FIXED] Report MUL+ADD together - also issue span
+------------------------------------------------------------------------
+r3508 | caparrov | 2013-10-03 11:24:34 +0200 (Thu, 03 Oct 2013) | 1 line
+
+[FIXED] Report MUL+ADD together
+------------------------------------------------------------------------
+r3506 | caparrov | 2013-10-03 10:39:49 +0200 (Thu, 03 Oct 2013) | 1 line
+
+[FIXED] Various errors reporting overlap
+------------------------------------------------------------------------
+r3505 | caparrov | 2013-10-03 00:15:59 +0200 (Thu, 03 Oct 2013) | 1 line
+
+[ADDED] Report all possible overlaps
+------------------------------------------------------------------------
+r3504 | caparrov | 2013-10-03 00:13:52 +0200 (Thu, 03 Oct 2013) | 1 line
+
+[ADDED] Report all possible overlaps
+------------------------------------------------------------------------
+r3499 | caparrov | 2013-10-02 17:04:03 +0200 (Wed, 02 Oct 2013) | 1 line
+
+
+------------------------------------------------------------------------
+r3498 | caparrov | 2013-10-01 23:38:34 +0200 (Tue, 01 Oct 2013) | 1 line
+
+[MODIFIED] Loads do not go into RS at all if there is space if LB, and RemainingInstructionFetchCycle
+------------------------------------------------------------------------
+r3497 | caparrov | 2013-10-01 18:32:50 +0200 (Tue, 01 Oct 2013) | 1 line
+
+[FIXED] Some comments were being printed
+------------------------------------------------------------------------
+r3496 | caparrov | 2013-10-01 18:20:11 +0200 (Tue, 01 Oct 2013) | 1 line
+
+Last version of DynamicAnalysis working with register
+------------------------------------------------------------------------
+r3494 | caparrov | 2013-10-01 13:34:22 +0200 (Tue, 01 Oct 2013) | 1 line
+
+[MODIFIED] Execution.cpp to change the names of the OOO buffers, which were conflicting with other names
+------------------------------------------------------------------------
+r3493 | caparrov | 2013-10-01 13:31:34 +0200 (Tue, 01 Oct 2013) | 1 line
+
+[MODIFIED] RegisterFile with only loads... Better not to use it
+------------------------------------------------------------------------
+r3480 | caparrov | 2013-09-30 23:25:29 +0200 (Mon, 30 Sep 2013) | 1 line
+
+[ADDED] Report overlap due to OOO buffer
+------------------------------------------------------------------------
+r3479 | caparrov | 2013-09-30 22:16:51 +0200 (Mon, 30 Sep 2013) | 1 line
+
+[ADDED] Report overlap due to OOO buffer
+------------------------------------------------------------------------
+r3475 | caparrov | 2013-09-28 13:46:38 +0200 (Sat, 28 Sep 2013) | 1 line
+
+[MODIFIED] Dispatch to StoreBuffer - Forgot to commit DynamicAnalysis.h
+------------------------------------------------------------------------
+r3474 | caparrov | 2013-09-28 13:43:33 +0200 (Sat, 28 Sep 2013) | 1 line
+
+[MODIFIED] Dispatch to StoreBuffer
+------------------------------------------------------------------------
+r3473 | caparrov | 2013-09-28 11:57:28 +0200 (Sat, 28 Sep 2013) | 1 line
+
+[ADDED] Some comments, no changes in execution
+------------------------------------------------------------------------
+r3472 | caparrov | 2013-09-27 17:00:22 +0200 (Fri, 27 Sep 2013) | 1 line
+
+[MODIFIED] Remove Register loads and store
+------------------------------------------------------------------------
+r3470 | caparrov | 2013-09-27 14:41:39 +0200 (Fri, 27 Sep 2013) | 1 line
+
+[MODIFIED] Cache size in number of cache lines was wrongopen llvm/include/llvm/Support/DynamicAnalysis.h 
+------------------------------------------------------------------------
+r3467 | caparrov | 2013-09-26 19:49:25 +0200 (Thu, 26 Sep 2013) | 1 line
+
+[MODIFIED] Loads and Stores leave the RS as soon as there is space in the LB/SB
+------------------------------------------------------------------------
+r3466 | caparrov | 2013-09-26 19:01:12 +0200 (Thu, 26 Sep 2013) | 1 line
+
+[MODIFIED] getInstructionValueIssueCycle does not return the max with InstructionFetchCycle, but this is done outside so that we can use the value
+------------------------------------------------------------------------
+r3465 | caparrov | 2013-09-26 18:32:40 +0200 (Thu, 26 Sep 2013) | 1 line
+
+[MODIFIED] Do not decrease InstructionFetchCycle for register ops, to be consistent with RemainingFetchCycles
+------------------------------------------------------------------------
+r3464 | caparrov | 2013-09-26 11:11:44 +0200 (Thu, 26 Sep 2013) | 1 line
+
+[MODIFIED] Specify cache line size
+------------------------------------------------------------------------
+r3461 | caparrov | 2013-09-26 00:50:37 +0200 (Thu, 26 Sep 2013) | 1 line
+
+[FIXED] Problem with division 1/th when searching for available bandwidth
+------------------------------------------------------------------------
+r3460 | caparrov | 2013-09-25 22:59:26 +0200 (Wed, 25 Sep 2013) | 1 line
+
+[MODIFIED] Check which cyles are available -- must be multiple of the memory bandwidth
+------------------------------------------------------------------------
+r3459 | caparrov | 2013-09-25 14:43:34 +0200 (Wed, 25 Sep 2013) | 1 line
+
+[FIXED] Use of PHI nodes
+------------------------------------------------------------------------
+r3458 | caparrov | 2013-09-25 14:43:16 +0200 (Wed, 25 Sep 2013) | 1 line
+
+[FIXED] Use of PHI nodes
+------------------------------------------------------------------------
+r3452 | caparrov | 2013-09-25 11:07:08 +0200 (Wed, 25 Sep 2013) | 1 line
+
+[FIXED] ... Moved RemainingInstructionToFetch again within the if statement
+------------------------------------------------------------------------
+r3448 | caparrov | 2013-09-24 17:26:37 +0200 (Tue, 24 Sep 2013) | 1 line
+
+[REMOVED] Some extra things of InsertNextAvailableCycle
+------------------------------------------------------------------------
+r3447 | caparrov | 2013-09-24 16:53:51 +0200 (Tue, 24 Sep 2013) | 1 line
+
+[FIXED]? Set LowerLevelsOccupacy to zero
+------------------------------------------------------------------------
+r3440 | caparrov | 2013-09-20 14:59:38 +0200 (Fri, 20 Sep 2013) | 1 line
+
+[FIXED] Problem with RemainingInstructionsTofetch, which were not being incremented
+------------------------------------------------------------------------
+r3437 | caparrov | 2013-09-19 14:24:25 +0200 (Thu, 19 Sep 2013) | 1 line
+
+[MODIFIED] Fixed the error calculating the reuse distance with cache lines
+------------------------------------------------------------------------
+r3436 | caparrov | 2013-09-19 14:22:54 +0200 (Thu, 19 Sep 2013) | 1 line
+
+[MODIFIED] Fixed the error calculating the reuse distance with cache lines
+------------------------------------------------------------------------
+r3433 | caparrov | 2013-09-19 11:21:50 +0200 (Thu, 19 Sep 2013) | 1 line
+
+[MODIFIED] Set the usage of a cache line when warm cache
+------------------------------------------------------------------------
+r3432 | caparrov | 2013-09-19 10:56:02 +0200 (Thu, 19 Sep 2013) | 1 line
+
+[MODIFIED] Removing from load buffer error -- Should not be slow anymore
+------------------------------------------------------------------------
+r3430 | caparrov | 2013-09-18 18:29:24 +0200 (Wed, 18 Sep 2013) | 1 line
+
+[MODIFIED] AvailableCyclesTree strategy -- At the end keep old
+------------------------------------------------------------------------
+r3429 | caparrov | 2013-09-18 18:28:09 +0200 (Wed, 18 Sep 2013) | 1 line
+
+[MODIFIED] AvailableCyclesTree strategy -- At the end keep old
+------------------------------------------------------------------------
+r3428 | caparrov | 2013-09-18 12:46:08 +0200 (Wed, 18 Sep 2013) | 1 line
+
+[MODIFIED] AvailableCyclesTree strategy
+------------------------------------------------------------------------
+r3427 | caparrov | 2013-09-18 11:14:44 +0200 (Wed, 18 Sep 2013) | 1 line
+
+Status before changing AvailableCyclesTree again
+------------------------------------------------------------------------
+r3426 | caparrov | 2013-09-18 09:06:04 +0200 (Wed, 18 Sep 2013) | 1 line
+
+[FIXED] Removing from buffers was creating problems
+------------------------------------------------------------------------
+r3425 | caparrov | 2013-09-17 16:06:14 +0200 (Tue, 17 Sep 2013) | 1 line
+
+[MODIFIED] Some reuse distances were not rounded...
+------------------------------------------------------------------------
+r3424 | caparrov | 2013-09-17 15:54:43 +0200 (Tue, 17 Sep 2013) | 1 line
+
+[MODIFIED] Print MemoryAddress and CacheLine in debug mode
+------------------------------------------------------------------------
+r3423 | caparrov | 2013-09-17 14:39:08 +0200 (Tue, 17 Sep 2013) | 1 line
+
+[FIXED] Missing enclosing brace
+------------------------------------------------------------------------
+r3422 | caparrov | 2013-09-17 14:37:02 +0200 (Tue, 17 Sep 2013) | 1 line
+
+[MODIFIED] Load/stores to registers are not inserted into the Load/Store buffers, not in tge ROB/RS
+------------------------------------------------------------------------
+r3421 | caparrov | 2013-09-17 14:23:50 +0200 (Tue, 17 Sep 2013) | 1 line
+
+[MODIFIED] Cache lines/ memory addresses dependences
+------------------------------------------------------------------------
+r3420 | caparrov | 2013-09-17 14:23:06 +0200 (Tue, 17 Sep 2013) | 1 line
+
+[MODIFIED] Cache lines/ memory addresses dependences
+------------------------------------------------------------------------
+r3419 | caparrov | 2013-09-17 13:52:23 +0200 (Tue, 17 Sep 2013) | 1 line
+
+[MODIFIED] DynamicAnalysis to add Stores in the StoreBuffer
+------------------------------------------------------------------------
+r3418 | caparrov | 2013-09-17 12:57:02 +0200 (Tue, 17 Sep 2013) | 1 line
+
+[FIXED] Right distinction betweem loads and stores
+------------------------------------------------------------------------
+r3417 | caparrov | 2013-09-17 10:48:10 +0200 (Tue, 17 Sep 2013) | 1 line
+
+[FIXED] insert in RegisterFile
+------------------------------------------------------------------------
+r3416 | caparrov | 2013-09-16 16:31:50 +0200 (Mon, 16 Sep 2013) | 1 line
+
+[MODIFIED] Memory address conversion from hexadecimal to decimal
+------------------------------------------------------------------------
+r3415 | caparrov | 2013-09-16 14:30:43 +0200 (Mon, 16 Sep 2013) | 1 line
+
+[MODIFIED] DynamicAnalysis to fetch cache lines
+------------------------------------------------------------------------
+r3409 | caparrov | 2013-09-13 15:14:20 +0200 (Fri, 13 Sep 2013) | 1 line
+
+[MODIFIED] MOB_BUFFERS error
+------------------------------------------------------------------------
+r3337 | caparrov | 2013-09-10 13:47:13 +0200 (Tue, 10 Sep 2013) | 1 line
+
+[ADDED] Load, Store and Line Fill buffers implementation
+------------------------------------------------------------------------
+r3317 | caparrov | 2013-09-08 16:08:28 +0200 (Sun, 08 Sep 2013) | 1 line
+
+[FIXED] mul latency
+------------------------------------------------------------------------
+r3222 | caparrov | 2013-09-01 22:16:05 +0200 (Sun, 01 Sep 2013) | 1 line
+
+[MODIFIED] ReuseTree to be uint64_t
+------------------------------------------------------------------------
+r3219 | caparrov | 2013-09-01 15:13:12 +0200 (Sun, 01 Sep 2013) | 1 line
+
+[MODIFIED] More debugging support
+------------------------------------------------------------------------
+r3218 | caparrov | 2013-09-01 12:38:26 +0200 (Sun, 01 Sep 2013) | 1 line
+
+[MODIFIED] More debugging support
+------------------------------------------------------------------------
+r3217 | caparrov | 2013-09-01 12:25:04 +0200 (Sun, 01 Sep 2013) | 1 line
+
+[MODIFIED] DynamicAnalasis to add support for selective debugging
+------------------------------------------------------------------------
+r3200 | caparrov | 2013-08-30 14:22:56 +0200 (Fri, 30 Aug 2013) | 1 line
+
+[MODIFIED] DynamicAnalysis.cpp - Deleted bandwidth message printing always and what to do if instruction fetch bandwidth is not set
+------------------------------------------------------------------------
+r3199 | caparrov | 2013-08-30 14:00:37 +0200 (Fri, 30 Aug 2013) | 1 line
+
+[FIEX] Execution.cpp - return NULL missing
+------------------------------------------------------------------------
+r3198 | caparrov | 2013-08-30 13:56:39 +0200 (Fri, 30 Aug 2013) | 1 line
+
+[MODIFIED] Execution.cpp and Interpreter.h to remove warnings and about probelms in granada
+------------------------------------------------------------------------
+r3194 | caparrov | 2013-08-29 16:14:21 +0200 (Thu, 29 Aug 2013) | 1 line
+
+[MODIFIED] DynamicAnalysis ot remove some DEBUG comments and print max occupacy of every level
+------------------------------------------------------------------------
+r3191 | caparrov | 2013-08-29 14:02:01 +0200 (Thu, 29 Aug 2013) | 1 line
+
+[MODIFIED] ExecutionEngine.cpp to solve dso_handle in linux...
+------------------------------------------------------------------------
+r3185 | caparrov | 2013-08-28 11:48:17 +0200 (Wed, 28 Aug 2013) | 1 line
+
+[MODIFIED] FindNextAvailable cycle to return node, and reduce memory in searching for available bandwidth
+------------------------------------------------------------------------
+r3182 | caparrov | 2013-08-28 08:33:46 +0200 (Wed, 28 Aug 2013) | 1 line
+
+[MODIFIED] llvm so that the interpreter passes the GenericValue from memory instructions to DynamicAnalysis
+------------------------------------------------------------------------
+r3161 | caparrov | 2013-08-25 23:09:44 +0200 (Sun, 25 Aug 2013) | 1 line
+
+[ADDED] and [DELETED] llvm files after git update
+------------------------------------------------------------------------
+r3160 | caparrov | 2013-08-25 23:00:08 +0200 (Sun, 25 Aug 2013) | 1 line
+
+[MODIFIED] Reservation station and ROB implementation, and flop throughput
+------------------------------------------------------------------------
+r3157 | caparrov | 2013-08-24 19:07:54 +0200 (Sat, 24 Aug 2013) | 1 line
+
+[MODIFIED] Reorder buffer and flop throughput
+------------------------------------------------------------------------
+r3151 | caparrov | 2013-08-23 16:37:19 +0200 (Fri, 23 Aug 2013) | 1 line
+
+[ADDED] clang with git...
+------------------------------------------------------------------------
+r3150 | caparrov | 2013-08-23 16:11:09 +0200 (Fri, 23 Aug 2013) | 1 line
+
+[UPDATED] llvm to last revision
+------------------------------------------------------------------------
+r3132 | caparrov | 2013-08-22 17:08:23 +0200 (Thu, 22 Aug 2013) | 1 line
+
+[ADDED] finally? clang
+------------------------------------------------------------------------
+r3124 | caparrov | 2013-08-21 16:09:54 +0200 (Wed, 21 Aug 2013) | 1 line
+
+[FIXED] DynamicAnalysis.h to count also fsub
+------------------------------------------------------------------------
+r3084 | caparrov | 2013-08-13 13:12:42 +0200 (Tue, 13 Aug 2013) | 1 line
+
+[FIXED] Error calculating group span after changing the sign of FirstIssueCycle
+------------------------------------------------------------------------
+r3079 | caparrov | 2013-08-12 10:26:00 +0200 (Mon, 12 Aug 2013) | 1 line
+
+[MODIFIED] FirstInstructionIssueCycle to be uint_64
+------------------------------------------------------------------------
+r3071 | caparrov | 2013-08-07 19:54:09 +0200 (Wed, 07 Aug 2013) | 1 line
+
+[MODIFIED] New strategy to reduce even more consumed memory
+------------------------------------------------------------------------
+r3070 | caparrov | 2013-08-07 11:12:06 +0200 (Wed, 07 Aug 2013) | 1 line
+
+[FIXED] A bug in calculating individual span
+------------------------------------------------------------------------
+r3068 | caparrov | 2013-08-06 22:51:38 +0200 (Tue, 06 Aug 2013) | 1 line
+
+[MODIFIED] Framework to avoid keeping large vector DAGLevelsOccupacy
+------------------------------------------------------------------------
+r3065 | caparrov | 2013-08-05 08:27:31 +0200 (Mon, 05 Aug 2013) | 1 line
+
+Changes in tool over the weekend
+------------------------------------------------------------------------
+r3058 | caparrov | 2013-07-31 11:10:27 +0200 (Wed, 31 Jul 2013) | 1 line
+
+[ADDED] Warm-cache support
+------------------------------------------------------------------------
+r3057 | caparrov | 2013-07-31 11:08:15 +0200 (Wed, 31 Jul 2013) | 1 line
+
+[ADDED] Warm-cache support
+------------------------------------------------------------------------
+r3054 | caparrov | 2013-07-30 16:40:58 +0200 (Tue, 30 Jul 2013) | 1 line
+
+[CLEANUP] DynamicAnalysis.cpp
+------------------------------------------------------------------------
+r3040 | caparrov | 2013-07-23 10:18:01 +0200 (Tue, 23 Jul 2013) | 1 line
+
+Deleted debugging comments... 
+------------------------------------------------------------------------
+r3039 | caparrov | 2013-07-22 17:11:30 +0200 (Mon, 22 Jul 2013) | 1 line
+
+[MODIFIED] for var arg
+------------------------------------------------------------------------
+r3037 | caparrov | 2013-07-22 15:10:52 +0200 (Mon, 22 Jul 2013) | 1 line
+
+[MODIFIED] llvm to support external functions like _fopen
+------------------------------------------------------------------------
+r3036 | caparrov | 2013-07-22 14:37:06 +0200 (Mon, 22 Jul 2013) | 1 line
+
+[MODIFIED] llvm/lib/ExecutionEngine/ExecutionEngine.cpp - Not sure what
+------------------------------------------------------------------------
+r3035 | caparrov | 2013-07-22 14:35:56 +0200 (Mon, 22 Jul 2013) | 1 line
+
+[MODIFIED] llvm/lib/CodeGen/IntrinsicLowering.cpp - Not sure what
+------------------------------------------------------------------------
+r3034 | caparrov | 2013-07-22 14:35:03 +0200 (Mon, 22 Jul 2013) | 1 line
+
+[MODIFIED] Check next available cycle
+------------------------------------------------------------------------
+r2839 | caparrov | 2013-06-04 12:11:41 +0200 (Tue, 04 Jun 2013) | 1 line
+
+[ADDED] git version of LLVM, updated to last revision
+------------------------------------------------------------------------

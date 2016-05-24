@@ -1,0 +1,441 @@
+DAG analyzer with microarchitectural constraints using the LLVM Interpreter
+=============================================================================
+
+Our tool to generate extended roofline plots is based on a DAG analysis
+implemented in the LLVM Interpreter. The analysis is implemented in
+the file DynamicAnalysis.cpp, which is within the llvm_root/lib/Support
+directory. 
+
+
+********************** INSTALLATION *****************************
+
+
+You can clone the code from:
+
+https://github.com/caparrov/llvm-performance.git
+
+It contains the entire LLVM directory, with the additional files in lib/Support
+that implement the analysis, and some modifications in the interpreter
+(lib/Execution/Interpreter/Execution.cpp).
+
+
+To build it, create an empty directory, e.g. llvm-performance-build, and within this
+directory type:
+
+path-to-llvm-performance/configure —enable-libffi
+
+
+If you want the installation of llvm-performance in a specific directory add the
+—prefix=path option to the configure.
+
+
+Then make, and make install.
+
+************************* USAGE *****************************
+
+(1) Compiling the source code (c/c++) into LLVM bitcode
+If every thing went right, now you should be able to run an application with the
+interpreter. The first step is to compile the application into LLVM IR (bitcode)
+using clang. You can use the file in the test-examples directory to try (mvm.c)
+You can include additional compilation flags, but need to include at least
+-emit-llvm to generate the bitcode.
+
+clang -emit-llvm -c -O3 -fno-vectorize -fno-slp-vectorize mvm.c -o mvm.bc
+
+
+Once the bitcode is generated, you can run the application with the following 
+command line.
+
+(2) Running the application through the interpreter
+
+path-to-where-llvm-is-installed/lli -force-interpreter mvm.bc 100
+
+The previous command line executes the application and analyzes its DAG without
+any microarchitectural constraints (ideal microprocessor with infinite resources).
+The microarchitectural constraints are specified as parameters in the command line.
+This is a description of the command-line options:
+
+/usr/local/tmp/bin/lli -help
+OVERVIEW: llvm interpreter & dynamic compiler
+
+USAGE: lli [options] <input bitcode> <program arguments>...
+
+OPTIONS:
+  
+  -address-generation-units=<uint>      - Specify the number of address generation units. Default value is infinity
+  -cache-line-size=<uint>               - Specify the cache line size (B). Default value is 64 B
+  -debug                                - Generate debug information to allow debugging IR.
+  -execution-units-latency=<number>     - Specify the execution latency of the nodes(cycles). Default value is 1 cycle
+  -execution-units-parallel-issue=<int> - Specify the number of nodes that can be executed in parallel based on ports execution. Default value is -1 cycle
+  -execution-units-throughput=<number>  - Specify the execution bandwidth of the nodes(ops executed/cycles). Default value is -1 cycle
+  -force-interpreter                    - Force interpretation: disable JIT
+  -function=<string>                    - Name of the function to be analyzed
+  -help                                 - Display available options (-help-hidden for more)
+  -instruction-fetch-bandwidth=<int>    - Specify the size of the reorder buffer. Default value is infinity 
+  -l1-cache-size=<uint>                 - Specify the size of the L1 cache (in bytes). Default value is 32 KB
+  -l2-cache-size=<uint>                 - Specify the size of the L2 cache (in bytes). Default value is 256 KB
+  -line-fill-buffer-size=<uint>         - Specify the size of the fill line buffer. Default value is infinity
+  -llc-cache-size=<uint>                - Specify the size of the L3 cache (in bytes). Default value is 20 MB  
+  -load-buffer-size=<uint>              - Specify the size of the load buffer. Default value is infinity  
+  -mem-access-granularity=<uint>        - Specify the memory access granularity for the different levels of the memory hierarchy (bytes). Default value is memory word size
+  -memory-word-size=<uint>              - Specify the size in bytes of a data item. Default value is 8 (double precision) 
+  -reorder-buffer-size=<uint>           - Specify the size of the reorder buffer. Default value is infinity
+  -reservation-station-size=<uint>      - Specify the size of a centralized reservation station. Default value is infinity  
+  -store-buffer-size=<uint>             - Specify the size of the store buffer. Default value is infinity
+  
+
+The following command line, for example, corresponds to 
+analyzing the application with the parameters that model a Sandy Bridge microarchitecture.
+
+
+path-to-where-llvm-is-installed/lli -force-interpreter -function mvm -execution-units-latency={3,5,22,1,4,4,12,30,100} -cache-line-size=64 -instruction-fetch-bandwidth=4 -reservation-station-size=54 -x86-memory-model -execution-units-throughput={1,1,0.22,1,16,16,32,32,8} -line-fill-buffer-size=10 -memory-word-size=8 -mem-access-granularity={8,8,64,64,64} -reorder-buffer-size=168 -load-buffer-size=64 -store-buffer-size=36 -execution-units-parallel-issue={1,1,1,1,2,1,1,1,1} mvm.bc 100
+
+
+
+************************* OUTPUT *****************************
+
+The output the execution is a summary of the execution (number of operations,
+span, stalls, overlaps, etc.). The output for the running example should be:
+
+
+
+
+//===--------------------------------------------------------------===//
+//                     Reuse Distance distribution                                    
+//===--------------------------------------------------------------===//
+-1 120
+32 100
+DATA_SET_SIZE	120
+//===--------------------------------------------------------------===//
+//                     Statistics                                    
+//===--------------------------------------------------------------===//
+RESOURCE	N_OPS_ISSUED	SPAN		ISSUE-SPAN	STALL-SPAN		SPAN-GAPS		MAX DAG LEVEL OCCUPANCY
+FP_ADDER		100		10		10		10		0		10 
+FP_MULT		100		1		1		1		0		100 
+FP_DIV		0		0		0		0		0		0 
+FP_SHUF		0		0		0		0		0		0 
+L1_LD		90		1		1		1		0		90 
+L1_ST		10		1		1		1		0		10 
+L2		0		0		0		0		0		0 
+L3		0		0		0		0		0		0 
+MEM		120		1		1		1		0		120 
+//===--------------------------------------------------------------===//
+//                     Stall Cycles                                    
+//===--------------------------------------------------------------===//
+RESOURCE	N_STALL_CYCLES		AVERAGE_OCCUPANCY
+RS		0		0
+ROB		0		0
+LB		0		0
+SB		0		0
+LFB		0		0
+//===--------------------------------------------------------------===//
+//                     Span Only Stalls                                    
+//===--------------------------------------------------------------===//
+0
+//===--------------------------------------------------------------===//
+//                     Port occupancy                                    
+//===--------------------------------------------------------------===//
+PORT		DISPATCH CYCLES
+PORT_0		1
+PORT_1		1
+PORT_2		1
+PORT_3		1
+PORT_4		0
+//===--------------------------------------------------------------===//
+//                     Resource-Stall Span                                    
+//===--------------------------------------------------------------===//
+RESOURCE	RS	ROB	LB	SB	LFB
+FP_ADDER		10	10	10	10	10	
+FP_MULT		1	1	1	1	1	
+FP_DIV		0	0	0	0	0	
+FP_SHUF		0	0	0	0	0	
+L1_LD		1	1	1	1	1	
+L1_ST		1	1	1	1	1	
+L2		0	0	0	0	0	
+L3		0	0	0	0	0	
+MEM		1	1	1	1	1	
+//===--------------------------------------------------------------===//
+//                     Resource-Stall Overlap (0-1)                                    
+//===--------------------------------------------------------------===//
+RESOURCE	RS	ROB	LB	SB	LFB
+FP_ADDER		 0.000  0.000  0.000  0.000  0.000 
+FP_MULT		 0.000  0.000  0.000  0.000  0.000 
+FP_DIV		 0.000  0.000  0.000  0.000  0.000 
+FP_SHUF		 0.000  0.000  0.000  0.000  0.000 
+L1_LD		 0.000  0.000  0.000  0.000  0.000 
+L1_ST		 0.000  0.000  0.000  0.000  0.000 
+L2		 0.000  0.000  0.000  0.000  0.000 
+L3		 0.000  0.000  0.000  0.000  0.000 
+MEM		 0.000  0.000  0.000  0.000  0.000 
+//===--------------------------------------------------------------===//
+//                     ResourceIssue-Stall Span                                    
+//===--------------------------------------------------------------===//
+RESOURCE	RS	ROB	LB	SB	LFB
+FP_ADDER		10	10	10	10	10	
+FP_MULT		1	1	1	1	1	
+FP_DIV		0	0	0	0	0	
+FP_SHUF		0	0	0	0	0	
+L1_LD		1	1	1	1	1	
+L1_ST		1	1	1	1	1	
+L2		0	0	0	0	0	
+L3		0	0	0	0	0	
+MEM		1	1	1	1	1	
+//===--------------------------------------------------------------===//
+//                     ResourceIssue-Stall Overlap (0-1)                                    
+//===--------------------------------------------------------------===//
+RESOURCE	RS	ROB	LB	SB	LFB
+FP_ADDER		 0.000  0.000  0.000  0.000  0.000 
+FP_MULT		 0.000  0.000  0.000  0.000  0.000 
+FP_DIV		 0.000  0.000  0.000  0.000  0.000 
+FP_SHUF		 0.000  0.000  0.000  0.000  0.000 
+L1_LD		 0.000  0.000  0.000  0.000  0.000 
+L1_ST		 0.000  0.000  0.000  0.000  0.000 
+L2		 0.000  0.000  0.000  0.000  0.000 
+L3		 0.000  0.000  0.000  0.000  0.000 
+MEM		 0.000  0.000  0.000  0.000  0.000 
+//===--------------------------------------------------------------===//
+//                     Resource-Resource Span (resources span without stalls)                                    
+//===--------------------------------------------------------------===//
+RESOURCE	FP_ADDER	FP_MULT	FP_DIV	FP_SHUF	L1_LD	L1_ST	L2	L3	MEM
+FP_ADDER		
+FP_MULT		11	
+FP_DIV		10	1	
+FP_SHUF		10	1	0	
+L1_LD		11	2	1	1	
+L1_ST		11	2	1	1	2	
+L2		10	1	0	0	1	1	
+L3		10	1	0	0	1	1	0	
+MEM		11	2	1	1	1	2	1	1	
+//===--------------------------------------------------------------===//
+//                     Resource-Resource Overlap Percentage (resources span without stall)                                    
+//===--------------------------------------------------------------===//
+RESOURCE	FP_ADDER	FP_MULT	FP_DIV	FP_SHUF	L1_LD	L1_ST	L2	L3	MEM
+FP_ADDER		
+FP_MULT		 0.000 
+FP_DIV		 0.000  0.000 
+FP_SHUF		 0.000  0.000  0.000 
+L1_LD		 0.000  0.000  0.000  0.000 
+L1_ST		 0.000  0.000  0.000  0.000  0.000 
+L2		 0.000  0.000  0.000  0.000  0.000  0.000 
+L3		 0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+MEM		 0.000  0.000  0.000  0.000  1.000  0.000  0.000  0.000 
+//===--------------------------------------------------------------===//
+//                     Resource-Resource Span (resources span with stalls)                                    
+//===--------------------------------------------------------------===//
+RESOURCE	FP_ADDER	FP_MULT	FP_DIV	FP_SHUF	L1_LD	L1_ST	L2	L3	MEM
+FP_ADDER		
+FP_MULT		11	
+FP_DIV		10	1	
+FP_SHUF		10	1	0	
+L1_LD		11	2	0	0	
+L1_ST		11	2	0	0	2	
+L2		10	1	0	0	1	1	
+L3		10	1	0	0	1	1	0	
+MEM		11	2	0	0	1	2	0	0	
+//===--------------------------------------------------------------===//
+//                     Resource-Resource Overlap Percentage (resources span with stall)                                    
+//===--------------------------------------------------------------===//
+RESOURCE	FP_ADDER	FP_MULT	FP_DIV	FP_SHUF	L1_LD	L1_ST	L2	L3	MEM
+FP_ADDER		
+FP_MULT		 0.000 
+FP_DIV		 0.000  0.000 
+FP_SHUF		 0.000  0.000  0.000 
+L1_LD		 0.000  0.000  0.000  0.000 
+L1_ST		 0.000  0.000  0.000  0.000  0.000 
+L2		 0.000  0.000  0.000  0.000  0.000  0.000 
+L3		 0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+MEM		 0.000  0.000  0.000  0.000  1.000  0.000  0.000  0.000 
+//===--------------------------------------------------------------===//
+//                     Stall-Stall Span                                    
+//===--------------------------------------------------------------===//
+RESOURCE	RS	ROB	LB	SB	LFB
+RS		
+ROB		0	
+LB		0	0	
+SB		0	0	0	
+LFB		0	0	0	0	
+//===--------------------------------------------------------------===//
+//                     Stall-Stall Overlap Percentage                                     
+//===--------------------------------------------------------------===//
+RESOURCE	RS	ROB	LB	SB	LFB
+RS		
+ROB		 0.000 
+LB		 0.000  0.000 
+SB		 0.000  0.000  0.000 
+LFB		 0.000  0.000  0.000  0.000 
+//===--------------------------------------------------------------===//
+//                     Bottlenecks                                    
+//===--------------------------------------------------------------===//
+Bottleneck	ISSUE	LAT	RS	ROB	LB	SB	LFB	
+FP_ADDER		 20.000  20.000 -1	-1	-1	-1	-1	
+FP_MULT		 200.000  200.000 -1	-1	-1	-1	-1	
+FP_DIV		-1	-1	-1	-1	-1	-1	-1	
+FP_SHUF		-1	-1	-1	-1	-1	-1	-1	
+L1_LD		 200.000  200.000 -1	-1	-1	-1	-1	
+L1_ST		 200.000  200.000 -1	-1	-1	-1	-1	
+L2		-1	-1	-1	-1	-1	-1	-1	
+L3		-1	-1	-1	-1	-1	-1	-1	
+MEM		 200.000  200.000 -1	-1	-1	-1	-1	
+//===--------------------------------------------------------------===//
+//                     Execution Times Breakdowns                                    
+//===--------------------------------------------------------------===//
+RESOURCE	MIN-EXEC-TIME	ISSUE-EFFECTS	LATENCY-EFFECTS	STALL-EFFECTS	TOTAL
+FP_ADDER		 1	 9	 0	 0	10
+FP_MULT		 1	 0	 0	 0	1
+FP_DIV		 0	 0	 0	 0	0
+FP_SHUF		 0	 0	 0	 0	0
+L1_LD		 1	 0	 0	 0	1
+L1_ST		 1	 0	 0	 0	1
+L2		 0	 0	 0	 0	0
+L3		 0	 0	 0	 0	0
+MEM		 1	 0	 0	 0	1
+//===--------------------------------------------------------------===//
+//                     TOTAL                                    
+//===--------------------------------------------------------------===//
+TOTAL FLOPS	200		11 
+TOTAL MOPS	220		2 
+TOTAL		420		13 
+PERFORMANCE 15.385
+//===--------------------------------------------------------------===//
+//                     SOURCE CODE LINE INFO                                    
+//===--------------------------------------------------------------===//
+Operations in line 100
+ FP_ADDER FP_MULT L1_LD MEM
+Operations in line 102
+ L1_ST
+Operations in line 97
+ MEM
+Line 97
+Cycle 1
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0
+Line 102
+Cycle 1
+ 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0 0
+Line 100
+Cycle 12
+ 20 0 2 0 0 0 0 0 2 0 0 0 0 0 0 0 2 0 0 0 0 0
+Execution time Post processing 1.829000e-03 s
+Total Execution time 1.328600e-02 s
+
+
+Explanation of each of the sections in the output report:
+
+(1)  Reuse Distance distribution
+ Reuse distance distribution, measured in number of cache line sizes.
+All the reuse distances are rounded to the next power of 2. This can be
+disabled.
+
+(2) Statistics
+ Contains, for each node in the computation DAG, the following information:
+
+N_OPS_ISSUED: number of nodes of the corresponding type.
+
+SPAN: number of cycles in which there are nodes of the corresponding type, *including
+latency cycles*.
+
+ISSUE-SPAN: number of cycles in which instructions of the corresponding type are
+executed, not including latency cycles.
+
+STALL-SPAN: the same as SPAN, but also includes cycles due to OoO buffer execution
+stalls. For example, imagine a sum reduction of 100 elements which, because of data dependences, must
+all execute sequentially, and the latency of floating-point additions is 3 cycles. ISSUE-SPAN is 100,
+because the cycles in which instructions are actually issued is only  100, but SPAN is 300, because
+the actual execution takes 300 cycles. We report these two spans to understand how many cycles are
+spent only in latency and, hence, report the latency as a bottleneck.
+
+Now assume that during the execution of the reduction there are some stalls due to the ROB (fake scenario).
+Then maybe during 20 cycles no instructions can be executed, but these 20 cycles are part of the total execution
+time. Then STALL-SPAN would be 320.
+
+MAX DAG LEVEL OCCUPANCY: maximum number of nodes of the corresponding type
+that are executed in a cycle. This number should never be larger than the associated throughput/bandwidth.
+If, for example, throughput is 2 but max DAG level occupancy is 1, means that actually we never use the full
+throughput.
+
+
+(3) Stall Cycles: number of cycles, from the total, execution time spent on each of the
+OoO execution buffers.
+
+(4) Span Only Stalls: total number of cycles, from the total execution cycles, in which
+there are stall cycles from any of the OoO execution buffers.
+
+(5) Port occupancy
+
+(6) Resource-Stall Span: For each pair execution resource/OoO buffer, the total span of
+the nodes associated to the corresponding resource, and the nodes associated
+to the corresponding buffer. If, for example, there are no stalls, these
+values should be the same as the ones in the SPAN column of the statistic 
+section. 
+
+(7) Resource-Stall Overlap (0-1): fraction of overlap between the cycles spent
+on the execution resource and the cycles associated to stalls.
+
+(8) ResourceIssue-Stall Span: same as section (6), but considering only
+the issue cycles (ISSUE_SPAN in section 2).
+
+(9)  ResourceIssue-Stall Overlap (0-1): same as section (7), but considering only
+the issue cycles (ISSUE_SPAN in section 2).
+
+(10) Resource-Resource Span (resources span without stalls): for every pair
+of execution resources, the total span of the two resources, i.e., how many
+cycles, from the total number of execution cycles, are spent in either of
+the resources. This span does not include stall cycles. 
+
+(11) Resource-Resource Overlap Percentage (resources span without stall):
+fraction of overlap between every pair of resources, not including the
+stall cycles.
+
+(12)  Resource-Resource Span (resources span with stalls): same as (10),
+but stall cycles are included in the execution time of each resource.
+
+(13) Resource-Resource Overlap Percentage (resources span with stall): same
+as (11), but including stall cycles. 
+
+(14) Stall-Stall Span: total span of every pair of OoO execution buffers. If
+the cycles of the buffers do not overlap, this span is the sum of the individual
+spans of each of the buffers (reported in Section (3)).  
+
+(15) Stall-Stall Overlap Percentage: fraction of overlap between the
+cycles stalled on each pair of OoO execution buffers.
+
+(16) Bottlenecks: this is the information that is used to calculate the 
+additional lines of the roofline plot. They are calculated with the formulas
+12-15 from [1].
+
+(17) Execution Times Breakdowns
+
+(18) TOTAL: total number of floating-point operations, total number of
+memory operations (first column), and total number of execution cycles
+spent on flops and on mops (second column). Performance estimation is
+calculated as the total number of flops divided by the total number
+of execution cycles.
+
+(19) SOURCE CODE LINE INFO: distribution of execution
+cycles (issue cycles, latency cycles, stall cycles, etc.) across
+the source code lines.
+ 
+********************** DISCLAIMER *****************************
+
+The tool is being developed as part of my PhD. 
+This tool provides all the information required to generate the
+extended roofline plots described in [1], but it does not
+generate nicely-formatted extended roofline plots right away.
+To get the script that parses the output file of this tool
+and generates the plot, please contact me.
+
+This approach has a drawback. If an application cannot run through
+the LLVM interpreter, then the analysis cannot be applied. To overcome
+this, we have an alternative way of doing the analysis that does
+not require the LLVM interpreter (but still based on the analysis
+of the dynamic trace of LLVM IR instructions). For more information
+about this approach, contact me.
+
+Similarly, if you want to compile more complex applications, that require
+linking several files and you don’t know how to do it, contact me:
+
+
+Victoria Caparros
+caparrov@inf.ethz.ch
+
+[1] Victoria Caparros and Markus Pueschel. “Extending the Roofline Model: Bottleneck Analysis with Microarchitectural Constraints”, in IISWC’14.
+
