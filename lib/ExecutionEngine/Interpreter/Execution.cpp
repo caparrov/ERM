@@ -48,7 +48,7 @@ static cl::opt<bool> PrintVolatile("interpreter-print-volatile", cl::Hidden,
 // Command line documentation:http://llvm.org/docs/CommandLine.html
 //===----------------------------------------------------------------------===//
 
-<<<<<<< HEAD
+
 static
 cl::opt <
 string > TargetFunction ("function",
@@ -216,63 +216,13 @@ bool > ConstraintAGUs ("constraint-agus", cl::Hidden,
 static
 cl::opt <
 bool > ConstraintPortsx86 ("constraint-ports-x86", cl::Hidden,
-=======
-static cl::opt<string> TargetFunction("function", cl::desc("Name of the function to be analyzed"),
-                                      cl::init("main"));
-
-static cl::opt <unsigned> MemoryWordSize("memory-word-size", cl::desc("Specify the size in bytes of a data item. Default value is 8 (double precision)"),cl::init(8));
-
-static cl::opt <unsigned> CacheLineSize("cache-line-size", cl::desc("Specify the cache line size (B). Default value is 8 B"),cl::init(8));
-
-static cl::opt <unsigned> L1CacheSize("l1-cache-size", cl::desc("Specify the size of the L1 cache (in bytes). Default value is 32 KB"),cl::init(32768));
-
-static cl::opt <unsigned> L2CacheSize("l2-cache-size", cl::desc("Specify the size of the L2 cache (in bytes). Default value is 256 KB"),cl::init(262144));
-
-static cl::opt <unsigned> LLCCacheSize("llc-cache-size", cl::desc("Specify the size of the L3 cache (in bytes). Default value is 20 MB"),cl::init(20971520));
-
-
-static cl::opt<string> Microarchitecture("uarch", cl::desc("Name of the microarchitecture"),
-                                      cl::init("SB"));
-
-static cl::list <float> ExecutionUnitsLatency("execution-units-latency",  cl::CommaSeparated, cl::desc("Specify the execution latency of the nodes(cycles). Default value is 1 cycle"));
-
-
-static cl::list <double> ExecutionUnitsThroughput("execution-units-throughput",  cl::CommaSeparated, cl::desc("Specify the execution bandwidth of the nodes(ops executed/cycles). Default value is -1 cycle"));
-
-static cl::list <int> ExecutionUnitsParallelIssue("execution-units-parallel-issue",  cl::CommaSeparated, cl::desc("Specify the number of nodes that can be executed in parallel based on ports execution. Default value is -1 cycle"));
-
-static cl::list<unsigned>  MemAccessGranularity("mem-access-granularity", cl::CommaSeparated, cl::desc("Specify the memory access granularity for the different levels of the memory hierarchy (bytes). Default value is memory word size"));
-
-static cl::opt <unsigned> AddressGenerationUnits("address-generation-units", cl::desc("Specify thenumber of address generation units. Default value is infinity"),cl::init(-1));
-
-
-static cl::opt <int> IFB("instruction-fetch-bandwidth", cl::desc("Specify the size of the reorder buffer. Default value is infinity"),cl::init(-1));
-
-static cl::opt <unsigned> ReservationStation("reservation-station-size", cl::desc("Specify the size of a centralized reservation station. Default value is infinity"),cl::init(0));
-
-static cl::opt <unsigned> ReorderBuffer("reorder-buffer-size", cl::desc("Specify the size of the reorder buffer. Default value is infinity"),cl::init(0));
-
-static cl::opt <unsigned> LoadBuffer("load-buffer-size", cl::desc("Specify the size of the load buffer. Default value is infinity"),cl::init(0));
-
-static cl::opt <unsigned> StoreBuffer("store-buffer-size", cl::desc("Specify the size of the store buffer. Default value is infinity"),cl::init(0));
-
-static cl::opt <unsigned> LineFillBuffer("line-fill-buffer-size", cl::desc("Specify the size of the fill line buffer. Default value is infinity"),cl::init(0));
-
-static cl::opt < bool > WarmCache("warm-cache", cl::Hidden, cl::desc("Enable analysis of application in a warm cache scenario. Default value is FALSE"),cl::init(false));
-
-static cl::opt < bool > x86MemoryModel("x86-memory-model", cl::Hidden, cl::desc("Implement x86 memory model. Default value is FALSE"),cl::init(false));
-
-static cl::opt < bool > ConstraintPorts("constraint-ports", cl::Hidden, cl::desc("Constraint ports dispatch according to specified architecture. Default value is FALSE"),cl::init(false));
-
-static cl::opt < bool > ConstraintPortsx86 ("constraint-ports-x86", cl::Hidden,
->>>>>>> 0f5a3bded113e34dc5ca66986bd8d881911da8b6
                    cl::desc
                    ("Constraint ports dispatch according to x86 architecture. Default value is FALSE"),
                    cl::init (false));
 
 
 
-<<<<<<< HEAD
+
 static
 cl::opt <
 bool > SpatialPrefetcher ("spatial-prefetcher", cl::Hidden,
@@ -313,25 +263,8 @@ bool > ReportOnlyPerformance ("report-only-performance", cl::Hidden,
                               cl::desc
                               ("Reports only performance (op count and span)"),
                               cl::init (false));
-=======
-
-static cl::opt < bool > ConstraintAGUs("constraint-agus", cl::Hidden, cl::desc("Constraint agus according to specified architecture. Default value is FALSE"),cl::init(false));
-
-static cl::opt < bool > SpatialPrefetcher("spatial-prefetcher", cl::Hidden, cl::desc("Implement spatial Prefetching"),cl::init(false));
-
-static cl::opt < unsigned > PrefetchLevel("prefetch-level", cl::Hidden, cl::desc("Level of the memory hierarchy where prefetched cache lines are loaded. 1= L1, 2 = L2, 3=LLC. Default is 3"),cl::init(3));
-
-static cl::opt < unsigned > PrefetchDispatch("prefetch-dispatch", cl::Hidden, cl::desc("Level of the memory hierarchy in which a miss causes a prefetch from the next line. 0= always try to prefetch, 1 = prefetch when there is a L1 miss, 2 = prefetch when there is a L2 miss, 3 = prefetch when there is a LLC miss,. Default is 1"),cl::init(1));
-
-static cl::opt < unsigned > PrefetchTarget("prefetch-target", cl::Hidden, cl::desc("Prefetch only if the target block is in the specified level of the memory or a lower leve`l. 2 = prefetch if the target line is in L2 or lower, 3 = prefetch if the target line is in LLC or lower, 4 = prefetch if the target line is in MEM. Default is 4"),cl::init(4));
 
 
-static cl::opt < bool > InOrderExecution("in-order-execution", cl::Hidden, cl::desc("In order execution"),cl::init(false));
-
-static cl::opt < bool > ReportOnlyPerformance("report-only-performance", cl::Hidden, cl::desc("Reports only performance (op count and span)"),cl::init(false));
-
-
->>>>>>> 0f5a3bded113e34dc5ca66986bd8d881911da8b6
 
 //===----------------------------------------------------------------------===//
 //                     Various Helper Functions
@@ -2517,46 +2450,6 @@ void Interpreter::callFunction(Function *F,
 
 
 
-/*
-void Interpreter::run() {
-  while (!ECStack.empty()) {
-    // Interpret a single instruction & increment the "PC".
-    ExecutionContext &SF = ECStack.back();  // Current stack frame
-    Instruction &I = *SF.CurInst++;         // Increment before execute
-    
-    // Track the number of dynamic instructions executed.
-    ++NumDynamicInsts;
-    
-    DEBUG(dbgs() << "About to interpret: " << I);
-    visit(I);   // Dispatch to one of the visit* methods...
-#if 0
-    // This is not safe, as visiting the instruction could lower it and free I.
-    DEBUG(
-          if (!isa<CallInst>(I) && !isa<InvokeInst>(I) &&
-              I.getType() != Type::VoidTy) {
-            dbgs() << "  --> ";
-            const GenericValue &Val = SF.Values[&I];
-            switch (I.getType()->getTypeID()) {
-              default: llvm_unreachable("Invalid GenericValue Type");
-              case Type::VoidTyID:    dbgs() << "void"; break;
-              case Type::FloatTyID:   dbgs() << "float " << Val.FloatVal; break;
-              case Type::DoubleTyID:  dbgs() << "double " << Val.DoubleVal; break;
-              case Type::PointerTyID: dbgs() << "void* " << intptr_t(Val.PointerVal);
-                break;
-              case Type::IntegerTyID:
-                dbgs() << "i" << Val.IntVal.getBitWidth() << " "
-                << Val.IntVal.toStringUnsigned(10)
-                << " (0x" << Val.IntVal.toStringUnsigned(16) << ")\n";
-                break;
-            }
-          });
-#endif
-  }
-}
- */
-
-
-
 void Interpreter::run() {
   
   bool TargetFunctionCalled = false;
@@ -2571,10 +2464,7 @@ void Interpreter::run() {
                                   Microarchitecture,
                                   MemoryWordSize,
                                   CacheLineSize,
-<<<<<<< HEAD
 						    RegisterFileSize,
-=======
->>>>>>> 0f5a3bded113e34dc5ca66986bd8d881911da8b6
                                   L1CacheSize,
                                   L2CacheSize,
                                   LLCCacheSize,
@@ -2695,22 +2585,7 @@ tEndCacheWarmed = clock();
  // ExecutionTimeActualSimulation = CyclesActualSimulation / ((float)CLOCKS_PER_SEC);
 ExecutionTimeActualSimulation = ((double) (tEndCacheWarmed - tStartCacheWarmed)) / CLOCKS_PER_SEC;
             dbgs() << "Execution time actual simulation " << ExecutionTimeActualSimulation << " s\n";
-/*
-
-             tStartPostProcessing = clock();
-            Analyzer->finishAnalysis();
-            tEndPostProcessing = clock();
-            CyclesPostProcessing = ((float)tEndPostProcessing - (float)tStartPostProcessing);
-            ExecutionTimePostProcessing = CyclesPostProcessing / CLOCKS_PER_SEC;
-            dbgs() << "Execution time Post processing " << ExecutionTimePostProcessing << " s\n";
-            
-            tStartPostProcessing = clock();
-            Analyzer->finishAnalysisContech(true);
-            tEndPostProcessing = clock();
-            CyclesPostProcessing = ((float)tEndPostProcessing - (float)tStartPostProcessing);
-            ExecutionTimePostProcessing = CyclesPostProcessing / CLOCKS_PER_SEC;
-            dbgs() << "Execution time Post processing " << ExecutionTimePostProcessing << " s\n";
-  */          
+        
             tStartPostProcessing = clock();
 
             Analyzer->finishAnalysisContechSimplified();
@@ -2740,29 +2615,6 @@ tStartCacheWarmed = clock();
     }
     
     
-  
-#if 0
-    // This is not safe, as visiting the instruction could lower it and free I.
-DEBUG(
-    if (!isa<CallInst>(I) && !isa<InvokeInst>(I) && 
-        I.getType() != Type::VoidTy) {
-      dbgs() << "  --> ";
-      const GenericValue &Val = SF.Values[&I];
-      switch (I.getType()->getTypeID()) {
-      default: llvm_unreachable("Invalid GenericValue Type");
-      case Type::VoidTyID:    dbgs() << "void"; break;
-      case Type::FloatTyID:   dbgs() << "float " << Val.FloatVal; break;
-      case Type::DoubleTyID:  dbgs() << "double " << Val.DoubleVal; break;
-      case Type::PointerTyID: dbgs() << "void* " << intptr_t(Val.PointerVal);
-        break;
-      case Type::IntegerTyID: 
-        dbgs() << "i" << Val.IntVal.getBitWidth() << " "
-               << Val.IntVal.toStringUnsigned(10)
-               << " (0x" << Val.IntVal.toStringUnsigned(16) << ")\n";
-        break;
-      }
-    });
-#endif
   }
   
   delete(Analyzer);

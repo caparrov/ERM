@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
 #define INTERPRETER
-=======
-//#define INTERPRETER
->>>>>>> 0f5a3bded113e34dc5ca66986bd8d881911da8b6
 
 #ifdef INTERPRETER
 #include "llvm/Support/DynamicAnalysis.h"

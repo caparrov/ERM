@@ -9,11 +9,9 @@
 #ifndef LLVM_SUPPORT_DYNAMIC_ANALYSIS_H
 #define LLVM_SUPPORT_DYNAMIC_ANALYSIS_H
 
-<<<<<<< HEAD
+
 #define INTERPRETER
-=======
-//#define INTERPRETER
->>>>>>> 0f5a3bded113e34dc5ca66986bd8d881911da8b6
+
 //#define EFF_TBV
 
 #include "../../../lib/ExecutionEngine/Interpreter/Interpreter.h"
@@ -738,11 +736,7 @@ unsigned GetOneToAllOverlapCyclesFinal(vector < int >&ResourcesVector, bool Issu
 #endif
   
   //Constructor
-<<<<<<< HEAD
 
-  //Constructor
-=======
->>>>>>> 0f5a3bded113e34dc5ca66986bd8d881911da8b6
   DynamicAnalysis(string TargetFunction,
                   string Microarchitecture,
                   unsigned MemoryWordSize,
@@ -776,13 +770,7 @@ unsigned GetOneToAllOverlapCyclesFinal(vector < int >&ResourcesVector, bool Issu
                   unsigned PrefetchDispatch,
                   unsigned PrefetchTarget);
   
-<<<<<<< HEAD
 
-
-
-=======
->>>>>>> 0f5a3bded113e34dc5ca66986bd8d881911da8b6
-  
   
   vector<Instruction*> instructionPool;
   
