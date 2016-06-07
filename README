@@ -1,3 +1,4 @@
+Extended Roofline Model (ERM)
 DAG analyzer with microarchitectural constraints using the LLVM Interpreter
 =============================================================================
 
@@ -12,20 +13,20 @@ directory.
 
 You can clone the code from:
 
-https://github.com/caparrov/llvm-performance.git
+https://github.com/caparrov/ERM.git
 
 It contains the entire LLVM directory, with the additional files in lib/Support
 that implement the analysis, and some modifications in the interpreter
 (lib/Execution/Interpreter/Execution.cpp).
 
 
-To build it, create an empty directory, e.g. llvm-performance-build, and within this
+To build it, create an empty directory, e.g. ERM-build, and within this
 directory type:
 
-path-to-llvm-performance/configure —enable-libffi
+path-to-ERM/configure —enable-libffi
 
 
-If you want the installation of llvm-performance in a specific directory add the
+If you want the installation of ERM in a specific directory add the
 —prefix=path option to the configure.
 
 
@@ -48,47 +49,76 @@ command line.
 
 (2) Running the application through the interpreter
 
-path-to-where-llvm-is-installed/lli -force-interpreter mvm.bc 100
+path-to-where-ERM-is-installed/lli -force-interpreter mvm.bc 100
 
 The previous command line executes the application and analyzes its DAG without
 any microarchitectural constraints (ideal microprocessor with infinite resources).
 The microarchitectural constraints are specified as parameters in the command line.
 This is a description of the command-line options:
 
-/usr/local/tmp/bin/lli -help
+path-to-where-ERM-is-installed/lli -help
 OVERVIEW: llvm interpreter & dynamic compiler
 
 USAGE: lli [options] <input bitcode> <program arguments>...
 
 OPTIONS:
-  
-  -address-generation-units=<uint>      - Specify the number of address generation units. Default value is infinity
-  -cache-line-size=<uint>               - Specify the cache line size (B). Default value is 64 B
+  -address-generation-units=<uint>      - Number of address generation units. Default value is infinity
+  -cache-line-size=<uint>               - Cache line size (B). Default value is 64 B
+  -constraint-agus                      - Constraint agus according to specified architecture. Default value is FALSE
+  -constraint-ports                     - Block the ports while the instruction is being issued according to the corresponding throughput.
+                                          Default value is FALSE
+  -constraint-ports-x86                 - Constraint ports dispatch according to x86 architecture. Default value is FALSE
   -debug                                - Generate debug information to allow debugging IR.
-  -execution-units-latency=<number>     - Specify the execution latency of the nodes(cycles). Default value is 1 cycle
-  -execution-units-parallel-issue=<int> - Specify the number of nodes that can be executed in parallel based on ports execution. Default value is -1 cycle
-  -execution-units-throughput=<number>  - Specify the execution bandwidth of the nodes(ops executed/cycles). Default value is -1 cycle
+  -execution-units-latency=<number>     - Execution latency of the execution units (cycles). Latencies specified in the following order: 
+                                          {fp added, fp mult, fp div, fp shuffle (vector), fp blend (vector), fp mov (vector),
+                                           register, L1 load, L1 store, L2, L3, mem}. Default value for all execution units is 1 cycle
+  -execution-units-parallel-issue=<int> - Number of operations that can be executed in parallel based on ports execution.
+                                          Values specified in the following order:
+                                           {fp added, fp mult, fp div, fp shuffle (vector), fp blend (vector), fp mov (vector), 
+                                          register, L1 load, L1 store, L2, L3, mem}. 
+                                          Default value is 1.
+  -execution-units-throughput=<number>  - Execution throughput of the functional units (ops executed/cycles). Throughputs specified
+                                          in the following order:
+                                           {fp added, fp mult, fp div, fp shuffle (vector), fp blend (vector), fp mov (vector), 
+                                          register, L1 load, L1 store, L2, L3, mem}. Default value is infinity
   -force-interpreter                    - Force interpretation: disable JIT
-  -function=<string>                    - Name of the function to be analyzed
+  -function=<string>                    - Name of the function to be analyzed. Default is main.
   -help                                 - Display available options (-help-hidden for more)
-  -instruction-fetch-bandwidth=<int>    - Specify the size of the reorder buffer. Default value is infinity 
-  -l1-cache-size=<uint>                 - Specify the size of the L1 cache (in bytes). Default value is 32 KB
-  -l2-cache-size=<uint>                 - Specify the size of the L2 cache (in bytes). Default value is 256 KB
+  -in-order-execution                   - In order execution. Default value is FALSE
+  -instruction-fetch-bandwidth=<int>    - Size of the reorder buffer. Default value is infinity
+  -l1-cache-size=<uint>                 - Size of the L1 cache (in bytes). Default value is 32 KB
+  -l2-cache-size=<uint>                 - Size of the L2 cache (in bytes). Default value is 256 KB
   -line-fill-buffer-size=<uint>         - Specify the size of the fill line buffer. Default value is infinity
-  -llc-cache-size=<uint>                - Specify the size of the L3 cache (in bytes). Default value is 20 MB  
-  -load-buffer-size=<uint>              - Specify the size of the load buffer. Default value is infinity  
-  -mem-access-granularity=<uint>        - Specify the memory access granularity for the different levels of the memory hierarchy (bytes). Default value is memory word size
-  -memory-word-size=<uint>              - Specify the size in bytes of a data item. Default value is 8 (double precision) 
-  -reorder-buffer-size=<uint>           - Specify the size of the reorder buffer. Default value is infinity
-  -reservation-station-size=<uint>      - Specify the size of a centralized reservation station. Default value is infinity  
-  -store-buffer-size=<uint>             - Specify the size of the store buffer. Default value is infinity
-  
+  -llc-cache-size=<uint>                - Size of the L3 cache (in bytes). Default value is 20 MB
+  -load-buffer-size=<uint>              - Size of the load buffer. Default value is infinity
+  -mem-access-granularity=<uint>        - Memory access granularity for the different levels of the memory hierarchy (bytes).
+                                          Values specified in the following order: 
+                                          {register, L1 load, L1 store, L2, L3, mem}. Default value is memory word size
+  -memory-word-size=<uint>              - Size in bytes of a memory word. Default value is 8 (floating-point double precision)
+  -prefetch-dispatch=<uint>             - Level of the memory hierarchy in which a miss causes a prefetch from the next line
+                                          (if spatial-prefetcher is TRUE). 
+                                          0= always try to prefetch, 1 = prefetch when there is a L1 miss, 2 = prefetch when there is a L2 miss, 
+                                          3 = prefetch when there is a LLC miss. Default is 1
+  -prefetch-level=<uint>                - Level of the memory hierarchy where prefetched cache lines are loaded
+                                          (if spatial-prefetcher is TRUE). 1= L1, 2 = L2, 3=LLC. Default is 3
+  -prefetch-target=<uint>               - Prefetch only if the target block is in the specified level of the memory or a lower level
+                                          (if spatial-prefetcher is TRUE). 
+                                          2 = prefetch if the target line is in L2 or lower, 3 = prefetch if the target line is in LLC or lower, 
+                                          4 = prefetch if the target line is in MEM. Default is 4
+  -register-file-size=<uint>            - Size of the register file. Default value is 0
+  -reorder-buffer-size=<uint>           - Size of the reorder buffer. Default value is infinity
+  -report-only-performance              - Reports only performance (op count and span)
+  -reservation-station-size=<uint>      - Size of a centralized reservation station. Default value is infinity
+  -spatial-prefetcher                   - Implement spatial Prefetching. Default value is FALSE
+  -store-buffer-size=<uint>             - Size of the store buffer. Default value is infinity
+  -warm-cache                           - Enable analysis of application in a warm cache scenario. Default value is FALSE
+  -x86-memory-model                     - Implement x86 memory model. Default value is FALSE
 
 The following command line, for example, corresponds to 
 analyzing the application with the parameters that model a Sandy Bridge microarchitecture.
 
 
-path-to-where-llvm-is-installed/lli -force-interpreter -function mvm -execution-units-latency={3,5,22,1,4,4,12,30,100} -cache-line-size=64 -instruction-fetch-bandwidth=4 -reservation-station-size=54 -x86-memory-model -execution-units-throughput={1,1,0.22,1,16,16,32,32,8} -line-fill-buffer-size=10 -memory-word-size=8 -mem-access-granularity={8,8,64,64,64} -reorder-buffer-size=168 -load-buffer-size=64 -store-buffer-size=36 -execution-units-parallel-issue={1,1,1,1,2,1,1,1,1} mvm.bc 100
+path-to-where-ERM-is-installed/lli -force-interpreter -function mvm -execution-units-latency={3,5,22,1,1,1,0,4,4,12,30,100} -cache-line-size=64 -instruction-fetch-bandwidth=4 -reservation-station-size=54 -x86-memory-model=1 -execution-units-throughput={1,1,0.22,1,1,1,-1,8,8,32,32,8} -line-fill-buffer-size=10 -spatial-prefetcher=0 -memory-word-size=8 -mem-access-granularity={8,8,8,64,64,64} -reorder-buffer-size=168 -store-buffer-size=36 -report-only-performance=0 -l1-cache-size=32768 -execution-units-parallel-issue={1,1,1,1,1,2,-1,2,1,1,1,1} -l2-cache-size=262144 -register-file-size=0 -constraint-ports-x86=1 -load-buffer-size=64 -constraint-ports=1 -constraint-agus=1 -llc-cache-size=20971520 -warm-cache=0 mvm.bc 100
 
 
 
@@ -98,153 +128,169 @@ The output the execution is a summary of the execution (number of operations,
 span, stalls, overlaps, etc.). The output for the running example should be:
 
 
-
-
+/local/ERM-bin/bin/lli -force-interpreter -function mvm mvm-register-emit-llvm-c-g-O3-fno-vectorize-fno-slp-vectorize-warm.bc 100
+Execution time actual simulation 9.000000e-02 s
 //===--------------------------------------------------------------===//
 //                     Reuse Distance distribution                                    
 //===--------------------------------------------------------------===//
--1 120
-32 100
-DATA_SET_SIZE	120
+-1 20200
+DATA_SET_SIZE	10200
 //===--------------------------------------------------------------===//
 //                     Statistics                                    
 //===--------------------------------------------------------------===//
-RESOURCE	N_OPS_ISSUED	SPAN		ISSUE-SPAN	STALL-SPAN		SPAN-GAPS		MAX DAG LEVEL OCCUPANCY
-FP_ADDER		100		10		10		10		0		10 
-FP_MULT		100		1		1		1		0		100 
-FP_DIV		0		0		0		0		0		0 
-FP_SHUF		0		0		0		0		0		0 
-L1_LD		90		1		1		1		0		90 
-L1_ST		10		1		1		1		0		10 
-L2		0		0		0		0		0		0 
-L3		0		0		0		0		0		0 
-MEM		120		1		1		1		0		120 
+RESOURCE	N_OPS_ISSUED	SPAN		ISSUE-SPAN	STALL-SPAN		MAX_OCCUPANCY
+FP_ADDER		10000		100		100		100		100 
+FP_MULTIPLIER		10000		1		1		1		10000 
+FP_DIVIDER		0		0		0		0		0 
+FP_SHUFFLE_UNIT		0		0		0		0		0 
+FP_BLEND_UNIT		0		0		0		0		0 
+FP_MOV_UNIT		0		0		0		0		0 
+REGISTER_CHANNEL		0		0		0		0		0 
+L1_LOAD_CHANNEL		0		0		0		0		0 
+L1_STORE_CHANNEL		100		1		1		1		100 
+L2		0		0		0		0		0 
+L3 		0		0		0		0		0 
+MEM_LOAD_CHANNEL		20100		1		1		1		20100 
 //===--------------------------------------------------------------===//
 //                     Stall Cycles                                    
 //===--------------------------------------------------------------===//
-RESOURCE	N_STALL_CYCLES		AVERAGE_OCCUPANCY
-RS		0		0
-ROB		0		0
-LB		0		0
-SB		0		0
-LFB		0		0
+RESOURCE	N_STALL_CYCLES		AVERAGE_OCCUPANCY		FRACTION_OCCUPANCY
+RS		0		 0.000		 0.000
+ROB		0		 0.000		 0.000
+LB		0		 0.000		 0.000
+SB		0		 0.000		 0.000
+LFB		0		 0.000		 0.000
 //===--------------------------------------------------------------===//
 //                     Span Only Stalls                                    
 //===--------------------------------------------------------------===//
 0
 //===--------------------------------------------------------------===//
-//                     Port occupancy                                    
-//===--------------------------------------------------------------===//
-PORT		DISPATCH CYCLES
-PORT_0		1
-PORT_1		1
-PORT_2		1
-PORT_3		1
-PORT_4		0
-//===--------------------------------------------------------------===//
 //                     Resource-Stall Span                                    
 //===--------------------------------------------------------------===//
 RESOURCE	RS	ROB	LB	SB	LFB
-FP_ADDER		10	10	10	10	10	
-FP_MULT		1	1	1	1	1	
-FP_DIV		0	0	0	0	0	
-FP_SHUF		0	0	0	0	0	
-L1_LD		1	1	1	1	1	
-L1_ST		1	1	1	1	1	
+FP_ADDER		100	100	100	100	100	
+FP_MULTIPLIER		1	1	1	1	1	
+FP_DIVIDER		0	0	0	0	0	
+FP_SHUFFLE_UNIT		0	0	0	0	0	
+FP_BLEND_UNIT		0	0	0	0	0	
+FP_MOV_UNIT		0	0	0	0	0	
+REGISTER_CHANNEL		0	0	0	0	0	
+L1_LOAD_CHANNEL		0	0	0	0	0	
+L1_STORE_CHANNEL		1	1	1	1	1	
 L2		0	0	0	0	0	
-L3		0	0	0	0	0	
-MEM		1	1	1	1	1	
+L3 		0	0	0	0	0	
+MEM_LOAD_CHANNEL		1	1	1	1	1	
 //===--------------------------------------------------------------===//
 //                     Resource-Stall Overlap (0-1)                                    
 //===--------------------------------------------------------------===//
 RESOURCE	RS	ROB	LB	SB	LFB
 FP_ADDER		 0.000  0.000  0.000  0.000  0.000 
-FP_MULT		 0.000  0.000  0.000  0.000  0.000 
-FP_DIV		 0.000  0.000  0.000  0.000  0.000 
-FP_SHUF		 0.000  0.000  0.000  0.000  0.000 
-L1_LD		 0.000  0.000  0.000  0.000  0.000 
-L1_ST		 0.000  0.000  0.000  0.000  0.000 
+FP_MULTIPLIER		 0.000  0.000  0.000  0.000  0.000 
+FP_DIVIDER		 0.000  0.000  0.000  0.000  0.000 
+FP_SHUFFLE_UNIT		 0.000  0.000  0.000  0.000  0.000 
+FP_BLEND_UNIT		 0.000  0.000  0.000  0.000  0.000 
+FP_MOV_UNIT		 0.000  0.000  0.000  0.000  0.000 
+REGISTER_CHANNEL		 0.000  0.000  0.000  0.000  0.000 
+L1_LOAD_CHANNEL		 0.000  0.000  0.000  0.000  0.000 
+L1_STORE_CHANNEL		 0.000  0.000  0.000  0.000  0.000 
 L2		 0.000  0.000  0.000  0.000  0.000 
-L3		 0.000  0.000  0.000  0.000  0.000 
-MEM		 0.000  0.000  0.000  0.000  0.000 
+L3 		 0.000  0.000  0.000  0.000  0.000 
+MEM_LOAD_CHANNEL		 0.000  0.000  0.000  0.000  0.000 
 //===--------------------------------------------------------------===//
 //                     ResourceIssue-Stall Span                                    
 //===--------------------------------------------------------------===//
 RESOURCE	RS	ROB	LB	SB	LFB
-FP_ADDER		10	10	10	10	10	
-FP_MULT		1	1	1	1	1	
-FP_DIV		0	0	0	0	0	
-FP_SHUF		0	0	0	0	0	
-L1_LD		1	1	1	1	1	
-L1_ST		1	1	1	1	1	
+FP_ADDER		100	100	100	100	100	
+FP_MULTIPLIER		1	1	1	1	1	
+FP_DIVIDER		0	0	0	0	0	
+FP_SHUFFLE_UNIT		0	0	0	0	0	
+FP_BLEND_UNIT		0	0	0	0	0	
+FP_MOV_UNIT		0	0	0	0	0	
+REGISTER_CHANNEL		0	0	0	0	0	
+L1_LOAD_CHANNEL		0	0	0	0	0	
+L1_STORE_CHANNEL		1	1	1	1	1	
 L2		0	0	0	0	0	
-L3		0	0	0	0	0	
-MEM		1	1	1	1	1	
+L3 		0	0	0	0	0	
+MEM_LOAD_CHANNEL		1	1	1	1	1	
 //===--------------------------------------------------------------===//
 //                     ResourceIssue-Stall Overlap (0-1)                                    
 //===--------------------------------------------------------------===//
 RESOURCE	RS	ROB	LB	SB	LFB
 FP_ADDER		 0.000  0.000  0.000  0.000  0.000 
-FP_MULT		 0.000  0.000  0.000  0.000  0.000 
-FP_DIV		 0.000  0.000  0.000  0.000  0.000 
-FP_SHUF		 0.000  0.000  0.000  0.000  0.000 
-L1_LD		 0.000  0.000  0.000  0.000  0.000 
-L1_ST		 0.000  0.000  0.000  0.000  0.000 
+FP_MULTIPLIER		 0.000  0.000  0.000  0.000  0.000 
+FP_DIVIDER		 0.000  0.000  0.000  0.000  0.000 
+FP_SHUFFLE_UNIT		 0.000  0.000  0.000  0.000  0.000 
+FP_BLEND_UNIT		 0.000  0.000  0.000  0.000  0.000 
+FP_MOV_UNIT		 0.000  0.000  0.000  0.000  0.000 
+REGISTER_CHANNEL		 0.000  0.000  0.000  0.000  0.000 
+L1_LOAD_CHANNEL		 0.000  0.000  0.000  0.000  0.000 
+L1_STORE_CHANNEL		 0.000  0.000  0.000  0.000  0.000 
 L2		 0.000  0.000  0.000  0.000  0.000 
-L3		 0.000  0.000  0.000  0.000  0.000 
-MEM		 0.000  0.000  0.000  0.000  0.000 
+L3 		 0.000  0.000  0.000  0.000  0.000 
+MEM_LOAD_CHANNEL		 0.000  0.000  0.000  0.000  0.000 
 //===--------------------------------------------------------------===//
 //                     Resource-Resource Span (resources span without stalls)                                    
 //===--------------------------------------------------------------===//
-RESOURCE	FP_ADDER	FP_MULT	FP_DIV	FP_SHUF	L1_LD	L1_ST	L2	L3	MEM
-FP_ADDER		
-FP_MULT		11	
-FP_DIV		10	1	
-FP_SHUF		10	1	0	
-L1_LD		11	2	1	1	
-L1_ST		11	2	1	1	2	
-L2		10	1	0	0	1	1	
-L3		10	1	0	0	1	1	0	
-MEM		11	2	1	1	1	2	1	1	
+RESOURCE	FP_ADDER	FP_MULTIPLIER	FP_DIVIDER	FP_SHUFFLE_UNIT	FP_BLEND_UNIT	FP_MOV_UNIT	REGISTER_CHANNEL	L1_LOAD_CHANNEL	L1_STORE_CHANNEL	L2	L3 	MEM_LOAD_CHANNEL
+FP_MULTIPLIER		101	
+FP_DIVIDER		100	1	
+FP_SHUFFLE_UNIT		100	1	0	
+FP_BLEND_UNIT		100	1	0	0	
+FP_MOV_UNIT		100	1	0	0	0	
+REGISTER_CHANNEL		100	1	0	0	0	0	
+L1_LOAD_CHANNEL		100	1	0	0	0	0	0	
+L1_STORE_CHANNEL		101	2	1	1	1	1	1	1	
+L2		100	1	0	0	0	0	0	0	1	
+L3 		100	1	0	0	0	0	0	0	1	0	
+MEM_LOAD_CHANNEL		101	2	1	1	1	1	1	1	2	1	1	
 //===--------------------------------------------------------------===//
 //                     Resource-Resource Overlap Percentage (resources span without stall)                                    
 //===--------------------------------------------------------------===//
-RESOURCE	FP_ADDER	FP_MULT	FP_DIV	FP_SHUF	L1_LD	L1_ST	L2	L3	MEM
+RESOURCE	FP_ADDER	FP_MULTIPLIER	FP_DIVIDER	FP_SHUFFLE_UNIT	FP_BLEND_UNIT	FP_MOV_UNIT	REGISTER_CHANNEL	L1_LOAD_CHANNEL	L1_STORE_CHANNEL	L2	L3 	MEM_LOAD_CHANNEL
 FP_ADDER		
-FP_MULT		 0.000 
-FP_DIV		 0.000  0.000 
-FP_SHUF		 0.000  0.000  0.000 
-L1_LD		 0.000  0.000  0.000  0.000 
-L1_ST		 0.000  0.000  0.000  0.000  0.000 
-L2		 0.000  0.000  0.000  0.000  0.000  0.000 
-L3		 0.000  0.000  0.000  0.000  0.000  0.000  0.000 
-MEM		 0.000  0.000  0.000  0.000  1.000  0.000  0.000  0.000 
+FP_MULTIPLIER		 0.000 
+FP_DIVIDER		 0.000  0.000 
+FP_SHUFFLE_UNIT		 0.000  0.000  0.000 
+FP_BLEND_UNIT		 0.000  0.000  0.000  0.000 
+FP_MOV_UNIT		 0.000  0.000  0.000  0.000  0.000 
+REGISTER_CHANNEL		 0.000  0.000  0.000  0.000  0.000  0.000 
+L1_LOAD_CHANNEL		 0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+L1_STORE_CHANNEL		 0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+L2		 0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+L3 		 0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+MEM_LOAD_CHANNEL		 0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
 //===--------------------------------------------------------------===//
 //                     Resource-Resource Span (resources span with stalls)                                    
 //===--------------------------------------------------------------===//
-RESOURCE	FP_ADDER	FP_MULT	FP_DIV	FP_SHUF	L1_LD	L1_ST	L2	L3	MEM
+RESOURCE	FP_ADDER	FP_MULTIPLIER	FP_DIVIDER	FP_SHUFFLE_UNIT	FP_BLEND_UNIT	FP_MOV_UNIT	REGISTER_CHANNEL	L1_LOAD_CHANNEL	L1_STORE_CHANNEL	L2	L3 	MEM_LOAD_CHANNEL
 FP_ADDER		
-FP_MULT		11	
-FP_DIV		10	1	
-FP_SHUF		10	1	0	
-L1_LD		11	2	0	0	
-L1_ST		11	2	0	0	2	
-L2		10	1	0	0	1	1	
-L3		10	1	0	0	1	1	0	
-MEM		11	2	0	0	1	2	0	0	
+FP_MULTIPLIER		101	
+FP_DIVIDER		100	1	
+FP_SHUFFLE_UNIT		100	1	0	
+FP_BLEND_UNIT		100	1	0	0	
+FP_MOV_UNIT		100	1	0	0	0	
+REGISTER_CHANNEL		100	1	0	0	0	0	
+L1_LOAD_CHANNEL		100	1	0	0	0	0	0	
+L1_STORE_CHANNEL		101	2	0	0	0	0	0	0	
+L2		100	1	0	0	0	0	0	0	1	
+L3 		100	1	0	0	0	0	0	0	1	0	
+MEM_LOAD_CHANNEL		101	2	0	0	0	0	0	0	2	0	0	
 //===--------------------------------------------------------------===//
 //                     Resource-Resource Overlap Percentage (resources span with stall)                                    
 //===--------------------------------------------------------------===//
-RESOURCE	FP_ADDER	FP_MULT	FP_DIV	FP_SHUF	L1_LD	L1_ST	L2	L3	MEM
+RESOURCE	FP_ADDER	FP_MULTIPLIER	FP_DIVIDER	FP_SHUFFLE_UNIT	FP_BLEND_UNIT	FP_MOV_UNIT	REGISTER_CHANNEL	L1_LOAD_CHANNEL	L1_STORE_CHANNEL	L2	L3 	MEM_LOAD_CHANNEL
 FP_ADDER		
-FP_MULT		 0.000 
-FP_DIV		 0.000  0.000 
-FP_SHUF		 0.000  0.000  0.000 
-L1_LD		 0.000  0.000  0.000  0.000 
-L1_ST		 0.000  0.000  0.000  0.000  0.000 
-L2		 0.000  0.000  0.000  0.000  0.000  0.000 
-L3		 0.000  0.000  0.000  0.000  0.000  0.000  0.000 
-MEM		 0.000  0.000  0.000  0.000  1.000  0.000  0.000  0.000 
+FP_MULTIPLIER		 0.000 
+FP_DIVIDER		 0.000  0.000 
+FP_SHUFFLE_UNIT		 0.000  0.000  0.000 
+FP_BLEND_UNIT		 0.000  0.000  0.000  0.000 
+FP_MOV_UNIT		 0.000  0.000  0.000  0.000  0.000 
+REGISTER_CHANNEL		 0.000  0.000  0.000  0.000  0.000  0.000 
+L1_LOAD_CHANNEL		 0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+L1_STORE_CHANNEL		 0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+L2		 0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+L3 		 0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+MEM_LOAD_CHANNEL		 0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
 //===--------------------------------------------------------------===//
 //                     Stall-Stall Span                                    
 //===--------------------------------------------------------------===//
@@ -264,58 +310,207 @@ LB		 0.000  0.000
 SB		 0.000  0.000  0.000 
 LFB		 0.000  0.000  0.000  0.000 
 //===--------------------------------------------------------------===//
-//                     Bottlenecks                                    
+//                     All overlaps                                    
+//===--------------------------------------------------------------===//
+0 1 | 1 | 0  0.000
+0 8 | 8 | 0  0.000
+0 11 | 11 | 0  0.000
+1 8 | 8 | 0  0.000
+1 11 | 11 | 0  0.000
+8 11 | 11 | 0  0.000
+0 1 8 | 8 | 0  0.000
+0 1 11 | 11 | 0  0.000
+0 8 11 | 11 | 0  0.000
+1 8 11 | 11 | 0  0.000
+0 1 8 11 | 11 | 0  0.000
+Resource with max overlap cycles: FP_ADDER
+MaxOverlapCycles: 0.000000e+00
+Resource with max overlap percentage: FP_ADDER
+MaxOverlap: 0.000000e+00
+12 0 0.000
+13 0 0.000
+14 0 0.000
+15 0 0.000
+16 0 0.000
+//===--------------------------------------------------------------===//
+//                     Breakdown Overlap                                    
+//===--------------------------------------------------------------===//
+FP_ADDER 100 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_MULTIPLIER 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_DIVIDER 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_SHUFFLE_UNIT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_BLEND_UNIT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_MOV_UNIT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+REGISTER_CHANNEL 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L1_LOAD_CHANNEL 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L1_STORE_CHANNEL 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L3  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+MEM_LOAD_CHANNEL 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+RS 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ROB 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+LB 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+SB 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+LFB 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+REGISTER 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ALL_L1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+LLC 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+MEM 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+//===--------------------------------------------------------------===//
+//                     Breakdown Overlap - Issue and only latency separated                                    
+//===--------------------------------------------------------------===//
+FP_ADDER ISSUE 100 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_ADDER ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_MULTIPLIER ISSUE 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_MULTIPLIER ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_DIVIDER ISSUE 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_DIVIDER ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_SHUFFLE_UNIT ISSUE 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_SHUFFLE_UNIT ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_BLEND_UNIT ISSUE 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_BLEND_UNIT ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_MOV_UNIT ISSUE 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FP_MOV_UNIT ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+REGISTER_CHANNEL ISSUE 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+REGISTER_CHANNEL ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L1_LOAD_CHANNEL ISSUE 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L1_LOAD_CHANNEL ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L1_STORE_CHANNEL ISSUE 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L1_STORE_CHANNEL ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L2 ISSUE 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L2 ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L3  ISSUE 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L3  ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+MEM_LOAD_CHANNEL ISSUE 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+MEM_LOAD_CHANNEL ONLY_LAT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+RS 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ROB 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+LB 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+SB 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+LFB 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+REGISTER 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ALL_L1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+L2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+LLC 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+MEM 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+//===--------------------------------------------------------------===//
+//                     Overlaps - Each resource with all the others                                    
+//===--------------------------------------------------------------===//
+FP_ADDER 0 0.000
+FP_MULTIPLIER 0 0.000
+L1_STORE_CHANNEL 0 0.000
+MEM_LOAD_CHANNEL 0 0.000
+//===--------------------------------------------------------------===//
+//                     Overlaps - Issue/Latency with all the others                                    
+//===--------------------------------------------------------------===//
+FP_ADDER ISSUE 0 0.000
+FP_ADDER ONLY LAT 0 0.000
+FP_MULTIPLIER ISSUE 0 0.000
+FP_MULTIPLIER ONLY LAT 0 0.000
+L1_STORE_CHANNEL ISSUE 0 0.000
+L1_STORE_CHANNEL ONLY LAT 0 0.000
+MEM_LOAD_CHANNEL ISSUE 0 0.000
+MEM_LOAD_CHANNEL ONLY LAT 0 0.000
+//===--------------------------------------------------------------===//
+//                     Bottlenecks - Buffers stalls added to issue                                    
 //===--------------------------------------------------------------===//
 Bottleneck	ISSUE	LAT	RS	ROB	LB	SB	LFB	
-FP_ADDER		 20.000  20.000 -1	-1	-1	-1	-1	
-FP_MULT		 200.000  200.000 -1	-1	-1	-1	-1	
-FP_DIV		-1	-1	-1	-1	-1	-1	-1	
-FP_SHUF		-1	-1	-1	-1	-1	-1	-1	
-L1_LD		 200.000  200.000 -1	-1	-1	-1	-1	
-L1_ST		 200.000  200.000 -1	-1	-1	-1	-1	
+FP_ADDER		 200.000  200.000 -1	-1	-1	-1	-1	
+FP_MULTIPLIER		 20000.000  20000.000 -1	-1	-1	-1	-1	
+FP_DIVIDER		-1	-1	-1	-1	-1	-1	-1	
+FP_SHUFFLE_UNIT		-1	-1	-1	-1	-1	-1	-1	
+FP_BLEND_UNIT		-1	-1	-1	-1	-1	-1	-1	
+FP_MOV_UNIT		-1	-1	-1	-1	-1	-1	-1	
+REGISTER_CHANNEL		-1	-1	-1	-1	-1	-1	-1	
+L1_LOAD_CHANNEL		-1	-1	-1	-1	-1	-1	-1	
+L1_STORE_CHANNEL		 20000.000  20000.000 -1	-1	-1	-1	-1	
 L2		-1	-1	-1	-1	-1	-1	-1	
-L3		-1	-1	-1	-1	-1	-1	-1	
-MEM		 200.000  200.000 -1	-1	-1	-1	-1	
+L3 		-1	-1	-1	-1	-1	-1	-1	
+MEM_LOAD_CHANNEL		 20000.000  20000.000 -1	-1	-1	-1	-1	
+//===--------------------------------------------------------------===//
+//                     Bottlenecks - Buffers stalls added to latency                                    
+//===--------------------------------------------------------------===//
+Bottleneck	ISSUE	LAT	RS	ROB	LB	SB	LFB	
+FP_ADDER		 200.000  200.000 -1	-1	-1	-1	-1	
+FP_MULTIPLIER		 20000.000  20000.000 -1	-1	-1	-1	-1	
+FP_DIVIDER		-1	-1	-1	-1	-1	-1	-1	
+FP_SHUFFLE_UNIT		-1	-1	-1	-1	-1	-1	-1	
+FP_BLEND_UNIT		-1	-1	-1	-1	-1	-1	-1	
+FP_MOV_UNIT		-1	-1	-1	-1	-1	-1	-1	
+REGISTER_CHANNEL		-1	-1	-1	-1	-1	-1	-1	
+L1_LOAD_CHANNEL		-1	-1	-1	-1	-1	-1	-1	
+L1_STORE_CHANNEL		 20000.000  20000.000 -1	-1	-1	-1	-1	
+L2		-1	-1	-1	-1	-1	-1	-1	
+L3 		-1	-1	-1	-1	-1	-1	-1	
+MEM_LOAD_CHANNEL		 20000.000  20000.000 -1	-1	-1	-1	-1	
+//===--------------------------------------------------------------===//
+//                     Buffers Bottlenecks                                    
+//===--------------------------------------------------------------===//
+Bottleneck	ISSUE
+RS	-1
+ROB	-1
+LB	-1
+SB	-1
+LFB	-1
+//===--------------------------------------------------------------===//
+//                     Bottlenecks II                                    
+//===--------------------------------------------------------------===//
+Bottleneck	ISSUE	LAT_ONLY
+FP_ADDER		 200.000 -1	
+FP_MULTIPLIER		 20000.000 -1	
+FP_DIVIDER		-1	-1	
+FP_SHUFFLE_UNIT		-1	-1	
+FP_BLEND_UNIT		-1	-1	
+FP_MOV_UNIT		-1	-1	
+REGISTER_CHANNEL		-1	-1	
+L1_LOAD_CHANNEL		-1	-1	
+L1_STORE_CHANNEL		 20000.000 -1	
+L2		-1	-1	
+L3 		-1	-1	
+MEM_LOAD_CHANNEL		 20000.000 -1	
+//===--------------------------------------------------------------===//
+//                     Issue/Only Latency Cycles                                    
+//===--------------------------------------------------------------===//
+FP_ADDER 100 0
+FP_MULTIPLIER 1 0
+FP_DIVIDER 0 0
+FP_SHUFFLE_UNIT 0 0
+FP_BLEND_UNIT 0 0
+FP_MOV_UNIT 0 0
+REGISTER_CHANNEL 0 0
+L1_LOAD_CHANNEL 0 0
+L1_STORE_CHANNEL 1 0
+L2 0 0
+L3  0 0
+MEM_LOAD_CHANNEL 1 0
 //===--------------------------------------------------------------===//
 //                     Execution Times Breakdowns                                    
 //===--------------------------------------------------------------===//
 RESOURCE	MIN-EXEC-TIME	ISSUE-EFFECTS	LATENCY-EFFECTS	STALL-EFFECTS	TOTAL
-FP_ADDER		 1	 9	 0	 0	10
-FP_MULT		 1	 0	 0	 0	1
-FP_DIV		 0	 0	 0	 0	0
-FP_SHUF		 0	 0	 0	 0	0
-L1_LD		 1	 0	 0	 0	1
-L1_ST		 1	 0	 0	 0	1
+FP_ADDER		 1	 99	 0	 0	100
+FP_MULTIPLIER		 1	 0	 0	 0	1
+FP_DIVIDER		 0	 0	 0	 0	0
+FP_SHUFFLE_UNIT		 0	 0	 0	 0	0
+FP_BLEND_UNIT		 0	 0	 0	 0	0
+FP_MOV_UNIT		 0	 0	 0	 0	0
+REGISTER_CHANNEL		 0	 0	 0	 0	0
+L1_LOAD_CHANNEL		 0	 0	 0	 0	0
+L1_STORE_CHANNEL		 1	 0	 0	 0	1
 L2		 0	 0	 0	 0	0
-L3		 0	 0	 0	 0	0
-MEM		 1	 0	 0	 0	1
+L3 		 0	 0	 0	 0	0
+MEM_LOAD_CHANNEL		 1	 0	 0	 0	1
 //===--------------------------------------------------------------===//
 //                     TOTAL                                    
 //===--------------------------------------------------------------===//
-TOTAL FLOPS	200		11 
-TOTAL MOPS	220		2 
-TOTAL		420		13 
-PERFORMANCE 15.385
-//===--------------------------------------------------------------===//
-//                     SOURCE CODE LINE INFO                                    
-//===--------------------------------------------------------------===//
-Operations in line 100
- FP_ADDER FP_MULT L1_LD MEM
-Operations in line 102
- L1_ST
-Operations in line 97
- MEM
-Line 97
-Cycle 1
- 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0
-Line 102
-Cycle 1
- 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0 0
-Line 100
-Cycle 12
- 20 0 2 0 0 0 0 0 2 0 0 0 0 0 0 0 2 0 0 0 0 0
-Execution time Post processing 1.829000e-03 s
-Total Execution time 1.328600e-02 s
+TOTAL FLOPS	20000		101 
+TOTAL MOV/SHUFFLE/BLEND	0		0 
+TOTAL MOPS	20200		2 
+TOTAL		40200		103 
+PERFORMANCE 194.175
+ NRegisterSpills 	0 
+Execution time Post processing 3.000000e-02 s
+Total Execution time 1.400000e-01 s
 
 
 Explanation of each of the sections in the output report:
@@ -398,19 +593,49 @@ spans of each of the buffers (reported in Section (3)).
 (15) Stall-Stall Overlap Percentage: fraction of overlap between the
 cycles stalled on each pair of OoO execution buffers.
 
-(16) Bottlenecks: this is the information that is used to calculate the 
-additional lines of the roofline plot. They are calculated with the formulas
-12-15 from [1].
+(16) All overlaps: overlap cycles and overlap fraction (of the minimum) for every
+combination of resources (0=FP_ADDER, 1= FP_MULTIPLIER) for which there are associated
+nodes.
 
-(17) Execution Times Breakdowns
+Resources | resource with min cycles | overlap cycles and overlap fraction
 
-(18) TOTAL: total number of floating-point operations, total number of
+
+(17) Breakdown Overlap: For every resource, overlap cycles with exactly 0,... N
+other resources. The sum of all these cycles must be equal to the resource Span
+
+(18) Breakdown Overlap - Issue and only latency separated: same as (17) but 
+separating issue and latency cycles.
+
+(19) Overlaps - Each resource with all the others: overlap cycles and fraction 
+of overlap cycles of each resource in which operations are executed and *all*
+other resources.
+
+(20) Overlaps - Issue/Latency with all the others: Same as (19) but with issue
+and latency separated.
+
+
+(21) Bottlenecks - Buffers stalls added to issue: this is the information that
+is used to calculate the  additional lines of the roofline plot. They are calculated
+with the formulas 12-15 from [1].
+
+(22) Bottlenecks - Buffers stalls added to latency: Same as (21) but buffer stalls
+are added to issue+latency cycles.
+
+(23) Buffers Bottlenecks: performance if Texec = Tbuff
+
+(24) Bottlenecks II: Same as (22) but only issue and latency bottlenecks
+
+(25) Issue/Only Latency Cycles
+
+(26) Execution Times Breakdowns
+
+(27) TOTAL: total number of floating-point operations, total number of
 memory operations (first column), and total number of execution cycles
 spent on flops and on mops (second column). Performance estimation is
 calculated as the total number of flops divided by the total number
 of execution cycles.
 
-(19) SOURCE CODE LINE INFO: distribution of execution
+(28) SOURCE CODE LINE INFO: distribution of execution
 cycles (issue cycles, latency cycles, stall cycles, etc.) across
 the source code lines.
  

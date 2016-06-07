@@ -32,6 +32,7 @@
 static DynamicAnalysis* Analyzer;
 
 
+
 using namespace std;
 using namespace llvm;
 
@@ -52,29 +53,29 @@ static cl::opt<bool> PrintVolatile("interpreter-print-volatile", cl::Hidden,
 static
 cl::opt <
 string > TargetFunction ("function",
-                         cl::desc ("Name of the function to be analyzed"),
+                         cl::desc ("Name of the function to be analyzed. Default is main."),
                          cl::init ("main"));
 
 static
 cl::opt < unsigned >
 MemoryWordSize ("memory-word-size",
                 cl::desc
-                ("Specify the size in bytes of a data item. Default value is 8 (double precision)"),
+                ("Size in bytes of a memory word. Default value is 8 (floating-point double precision)"),
                 cl::init (8));
 
 static
 cl::opt < unsigned >
 CacheLineSize ("cache-line-size",
                cl::desc
-               ("Specify the cache line size (B). Default value is 64 B"),
-               cl::init (64));
+               ("Cache line size (B). Default value is 64 B"),
+               cl::init (8));
 
 
 static
 cl::opt < unsigned >
 RegisterFileSize ("register-file-size",
              cl::desc
-             ("Specify the size of the register file. Default value is 0"),
+             ("Size of the register file. Default value is 0"),
              cl::init (0));
 
 
@@ -82,22 +83,22 @@ static
 cl::opt < unsigned >
 L1CacheSize ("l1-cache-size",
              cl::desc
-             ("Specify the size of the L1 cache (in bytes). Default value is 32 KB"),
-             cl::init (32768));
+             ("Size of the L1 cache (in bytes). Default value is 32 KB"),
+             cl::init (0));
 
 static
 cl::opt < unsigned >
 L2CacheSize ("l2-cache-size",
              cl::desc
-             ("Specify the size of the L2 cache (in bytes). Default value is 256 KB"),
-             cl::init (262144));
+             ("Size of the L2 cache (in bytes). Default value is 256 KB"),
+             cl::init (0));
 
 static
 cl::opt < unsigned >
 LLCCacheSize ("llc-cache-size",
               cl::desc
-              ("Specify the size of the L3 cache (in bytes). Default value is 20 MB"),
-              cl::init (20971520));
+              ("Size of the L3 cache (in bytes). Default value is 20 MB"),
+              cl::init (0));
 
 
 static
@@ -110,34 +111,34 @@ static
 cl::list < float >
 ExecutionUnitsLatency ("execution-units-latency", cl::CommaSeparated,
                        cl::desc
-                       ("Specify the execution latency of the nodes(cycles). Default value is 1 cycle"));
+                       ("Execution latency of the execution units (cycles). Latencies specified in the following order: \n{fp added, fp mult, fp div, fp shuffle (vector), fp blend (vector), fp mov (vector),\n register, L1 load, L1 store, L2, L3, mem}. Default value for all execution units is 1 cycle"));
 
 
 static
 cl::list < double >
 ExecutionUnitsThroughput ("execution-units-throughput", cl::CommaSeparated,
                           cl::desc
-                          ("Specify the execution bandwidth of the nodes(ops executed/cycles). Default value is -1 cycle"));
+                          ("Execution throughput of the functional units (ops executed/cycles). Throughputs specified\nin the following order:\n {fp added, fp mult, fp div, fp shuffle (vector), fp blend (vector), fp mov (vector), \nregister, L1 load, L1 store, L2, L3, mem}. Default value is infinity"));
 
 static
 cl::list < int >
 ExecutionUnitsParallelIssue ("execution-units-parallel-issue",
                              cl::CommaSeparated,
                              cl::desc
-                             ("Specify the number of nodes that can be executed in parallel based on ports execution. Default value is -1 cycle"));
+                             ("Number of operations that can be executed in parallel based on ports execution.\nValues specified in the following order:\n {fp added, fp mult, fp div, fp shuffle (vector), fp blend (vector), fp mov (vector), \nregister, L1 load, L1 store, L2, L3, mem}. \nDefault value is 1."));
 
 
 static
 cl::list < unsigned >
 MemAccessGranularity ("mem-access-granularity", cl::CommaSeparated,
                       cl::desc
-                      ("Specify the memory access granularity for the different levels of the memory hierarchy (bytes). Default value is memory word size"));
+                      ("Memory access granularity for the different levels of the memory hierarchy (bytes).\nValues specified in the following order: \n{register, L1 load, L1 store, L2, L3, mem}. Default value is memory word size"));
 
 static
 cl::opt < unsigned >
 AddressGenerationUnits ("address-generation-units",
                         cl::desc
-                        ("Specify thenumber of address generation units. Default value is infinity"),
+                        ("Number of address generation units. Default value is infinity"),
                         cl::init (-1));
 
 
@@ -145,35 +146,35 @@ static
 cl::opt < int >
 IFB ("instruction-fetch-bandwidth",
      cl::desc
-     ("Specify the size of the reorder buffer. Default value is infinity"),
+     ("Size of the reorder buffer. Default value is infinity"),
      cl::init (-1));
 
 static
 cl::opt < unsigned >
 ReservationStation ("reservation-station-size",
                     cl::desc
-                    ("Specify the size of a centralized reservation station. Default value is infinity"),
+                    ("Size of a centralized reservation station. Default value is infinity"),
                     cl::init (0));
 
 static
 cl::opt < unsigned >
 ReorderBuffer ("reorder-buffer-size",
                cl::desc
-               ("Specify the size of the reorder buffer. Default value is infinity"),
+               ("Size of the reorder buffer. Default value is infinity"),
                cl::init (0));
 
 static
 cl::opt < unsigned >
 LoadBuffer ("load-buffer-size",
             cl::desc
-            ("Specify the size of the load buffer. Default value is infinity"),
+            ("Size of the load buffer. Default value is infinity"),
             cl::init (0));
 
 static
 cl::opt < unsigned >
 StoreBuffer ("store-buffer-size",
              cl::desc
-             ("Specify the size of the store buffer. Default value is infinity"),
+             ("Size of the store buffer. Default value is infinity"),
              cl::init (0));
 
 static
@@ -186,28 +187,28 @@ LineFillBuffer ("line-fill-buffer-size",
 static
 cl::opt <
 bool >
-WarmCache ("warm-cache", cl::Hidden,
+WarmCache ("warm-cache",
            cl::desc
            ("Enable analysis of application in a warm cache scenario. Default value is FALSE"),
            cl::init (false));
 
 static
 cl::opt <
-bool > x86MemoryModel ("x86-memory-model", cl::Hidden,
+bool > x86MemoryModel ("x86-memory-model",
                        cl::desc
                        ("Implement x86 memory model. Default value is FALSE"),
                        cl::init (false));
 
 static
 cl::opt <
-bool > ConstraintPorts ("constraint-ports", cl::Hidden,
+bool > ConstraintPorts ("constraint-ports",
                         cl::desc
-                        ("Block the ports while the instruction is being issued according to the corresponding throughput. Default value is FALSE"),
+                        ("Block the ports while the instruction is being issued according to the corresponding throughput.\nDefault value is FALSE"),
                         cl::init (false));
 
 static
 cl::opt <
-bool > ConstraintAGUs ("constraint-agus", cl::Hidden,
+bool > ConstraintAGUs ("constraint-agus",
                        cl::desc
                        ("Constraint agus according to specified architecture. Default value is FALSE"),
                        cl::init (false));
@@ -215,7 +216,7 @@ bool > ConstraintAGUs ("constraint-agus", cl::Hidden,
 
 static
 cl::opt <
-bool > ConstraintPortsx86 ("constraint-ports-x86", cl::Hidden,
+bool > ConstraintPortsx86 ("constraint-ports-x86",
                    cl::desc
                    ("Constraint ports dispatch according to x86 architecture. Default value is FALSE"),
                    cl::init (false));
@@ -225,41 +226,41 @@ bool > ConstraintPortsx86 ("constraint-ports-x86", cl::Hidden,
 
 static
 cl::opt <
-bool > SpatialPrefetcher ("spatial-prefetcher", cl::Hidden,
-                          cl::desc ("Implement spatial Prefetching"),
+bool > SpatialPrefetcher ("spatial-prefetcher",
+                          cl::desc ("Implement spatial Prefetching. Default value is FALSE"),
                           cl::init (false));
 
 static
 cl::opt < unsigned >
-PrefetchLevel ("prefetch-level", cl::Hidden,
+PrefetchLevel ("prefetch-level",
                cl::desc
-               ("Level of the memory hierarchy where prefetched cache lines are loaded. 1= L1, 2 = L2, 3=LLC. Default is 3"),
+               ("Level of the memory hierarchy where prefetched cache lines are loaded\n(if spatial-prefetcher is TRUE). 1= L1, 2 = L2, 3=LLC. Default is 3"),
                cl::init (3));
 
 static
 cl::opt < unsigned >
-PrefetchDispatch ("prefetch-dispatch", cl::Hidden,
+PrefetchDispatch ("prefetch-dispatch", 
                   cl::desc
-                  ("Level of the memory hierarchy in which a miss causes a prefetch from the next line. 0= always try to prefetch, 1 = prefetch when there is a L1 miss, 2 = prefetch when there is a L2 miss, 3 = prefetch when there is a LLC miss,. Default is 1"),
+                  ("Level of the memory hierarchy in which a miss causes a prefetch from the next line\n(if spatial-prefetcher is TRUE). \n0= always try to prefetch, 1 = prefetch when there is a L1 miss, 2 = prefetch when there is a L2 miss, \n3 = prefetch when there is a LLC miss. Default is 1"),
                   cl::init (1));
 
 static
 cl::opt < unsigned >
-PrefetchTarget ("prefetch-target", cl::Hidden,
+PrefetchTarget ("prefetch-target",
                 cl::desc
-                ("Prefetch only if the target block is in the specified level of the memory or a lower leve`l. 2 = prefetch if the target line is in L2 or lower, 3 = prefetch if the target line is in LLC or lower, 4 = prefetch if the target line is in MEM. Default is 4"),
+                ("Prefetch only if the target block is in the specified level of the memory or a lower level\n(if spatial-prefetcher is TRUE). \n2 = prefetch if the target line is in L2 or lower, 3 = prefetch if the target line is in LLC or lower, \n4 = prefetch if the target line is in MEM. Default is 4"),
                 cl::init (4));
 
 
 static
 cl::opt <
 bool >
-InOrderExecution ("in-order-execution", cl::Hidden,
-                  cl::desc ("In order execution"), cl::init (false));
+InOrderExecution ("in-order-execution",
+                  cl::desc ("In order execution. Default value is FALSE"), cl::init (false));
 
 static
 cl::opt <
-bool > ReportOnlyPerformance ("report-only-performance", cl::Hidden,
+bool > ReportOnlyPerformance ("report-only-performance",
                               cl::desc
                               ("Reports only performance (op count and span)"),
                               cl::init (false));
@@ -2456,8 +2457,8 @@ void Interpreter::run() {
   bool TargetFunctionExecuted = false;
   
   //================== Code inserted into the interpreter ================
-  clock_t tStart, tEnd, tStartPostProcessing, tEndPostProcessing, tStartCacheWarmed, tEndCacheWarmed ;
-  float Cycles, ExecutionTime, CyclesPostProcessing, ExecutionTimePostProcessing, ExecutionTimeActualSimulation;
+  clock_t tStart, tEnd = 0 , tStartPostProcessing = 0, tEndPostProcessing = 0, tStartCacheWarmed = 0, tEndCacheWarmed = 0;
+  float Cycles = 0, ExecutionTime=0, CyclesPostProcessing=0, ExecutionTimePostProcessing=0, ExecutionTimeActualSimulation=0;
   
 
   Analyzer = new DynamicAnalysis (TargetFunction,
