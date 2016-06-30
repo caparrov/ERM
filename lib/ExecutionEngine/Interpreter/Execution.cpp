@@ -32,7 +32,6 @@
 static DynamicAnalysis* Analyzer;
 
 
-
 using namespace std;
 using namespace llvm;
 
@@ -48,7 +47,6 @@ static cl::opt<bool> PrintVolatile("interpreter-print-volatile", cl::Hidden,
 //
 // Command line documentation:http://llvm.org/docs/CommandLine.html
 //===----------------------------------------------------------------------===//
-
 
 static
 cl::opt <
@@ -83,7 +81,7 @@ static
 cl::opt < unsigned >
 L1CacheSize ("l1-cache-size",
              cl::desc
-             ("Size of the L1 cache (in bytes). Default value is 32 KB"),
+             ("Size of the L1 cache (in bytes). Default value is 0"),
              cl::init (0));
 
 static
@@ -258,12 +256,21 @@ bool >
 InOrderExecution ("in-order-execution",
                   cl::desc ("In order execution. Default value is FALSE"), cl::init (false));
 
+
 static
 cl::opt <
 bool > ReportOnlyPerformance ("report-only-performance",
                               cl::desc
                               ("Reports only performance (op count and span)"),
                               cl::init (false));
+
+static
+cl::opt <
+bool > ReportOnlyPerformance ("report-only-performance",
+                              cl::desc
+                              ("Reports only performance (op count and span)"),
+                              cl::init (false));
+
 
 
 
@@ -2451,14 +2458,54 @@ void Interpreter::callFunction(Function *F,
 
 
 
+/*
+void Interpreter::run() {
+  while (!ECStack.empty()) {
+    // Interpret a single instruction & increment the "PC".
+    ExecutionContext &SF = ECStack.back();  // Current stack frame
+    Instruction &I = *SF.CurInst++;         // Increment before execute
+    
+    // Track the number of dynamic instructions executed.
+    ++NumDynamicInsts;
+    
+    DEBUG(dbgs() << "About to interpret: " << I);
+    visit(I);   // Dispatch to one of the visit* methods...
+#if 0
+    // This is not safe, as visiting the instruction could lower it and free I.
+    DEBUG(
+          if (!isa<CallInst>(I) && !isa<InvokeInst>(I) &&
+              I.getType() != Type::VoidTy) {
+            dbgs() << "  --> ";
+            const GenericValue &Val = SF.Values[&I];
+            switch (I.getType()->getTypeID()) {
+              default: llvm_unreachable("Invalid GenericValue Type");
+              case Type::VoidTyID:    dbgs() << "void"; break;
+              case Type::FloatTyID:   dbgs() << "float " << Val.FloatVal; break;
+              case Type::DoubleTyID:  dbgs() << "double " << Val.DoubleVal; break;
+              case Type::PointerTyID: dbgs() << "void* " << intptr_t(Val.PointerVal);
+                break;
+              case Type::IntegerTyID:
+                dbgs() << "i" << Val.IntVal.getBitWidth() << " "
+                << Val.IntVal.toStringUnsigned(10)
+                << " (0x" << Val.IntVal.toStringUnsigned(16) << ")\n";
+                break;
+            }
+          });
+#endif
+  }
+}
+ */
+
+
+
 void Interpreter::run() {
   
   bool TargetFunctionCalled = false;
   bool TargetFunctionExecuted = false;
   
   //================== Code inserted into the interpreter ================
-  clock_t tStart, tEnd = 0 , tStartPostProcessing = 0, tEndPostProcessing = 0, tStartCacheWarmed = 0, tEndCacheWarmed = 0;
-  float Cycles = 0, ExecutionTime=0, CyclesPostProcessing=0, ExecutionTimePostProcessing=0, ExecutionTimeActualSimulation=0;
+  clock_t tStart, tEnd, tStartPostProcessing, tEndPostProcessing, tStartCacheWarmed, tEndCacheWarmed ;
+  float Cycles, ExecutionTime, CyclesPostProcessing, ExecutionTimePostProcessing, ExecutionTimeActualSimulation;
   
 
   Analyzer = new DynamicAnalysis (TargetFunction,
@@ -2491,6 +2538,7 @@ void Interpreter::run() {
                                   ReportOnlyPerformance,
                                   PrefetchLevel,
                                   PrefetchDispatch, PrefetchTarget);
+  
 
 
 
@@ -2586,7 +2634,22 @@ tEndCacheWarmed = clock();
  // ExecutionTimeActualSimulation = CyclesActualSimulation / ((float)CLOCKS_PER_SEC);
 ExecutionTimeActualSimulation = ((double) (tEndCacheWarmed - tStartCacheWarmed)) / CLOCKS_PER_SEC;
             dbgs() << "Execution time actual simulation " << ExecutionTimeActualSimulation << " s\n";
-        
+/*
+
+             tStartPostProcessing = clock();
+            Analyzer->finishAnalysis();
+            tEndPostProcessing = clock();
+            CyclesPostProcessing = ((float)tEndPostProcessing - (float)tStartPostProcessing);
+            ExecutionTimePostProcessing = CyclesPostProcessing / CLOCKS_PER_SEC;
+            dbgs() << "Execution time Post processing " << ExecutionTimePostProcessing << " s\n";
+            
+            tStartPostProcessing = clock();
+            Analyzer->finishAnalysisContech(true);
+            tEndPostProcessing = clock();
+            CyclesPostProcessing = ((float)tEndPostProcessing - (float)tStartPostProcessing);
+            ExecutionTimePostProcessing = CyclesPostProcessing / CLOCKS_PER_SEC;
+            dbgs() << "Execution time Post processing " << ExecutionTimePostProcessing << " s\n";
+  */          
             tStartPostProcessing = clock();
 
             Analyzer->finishAnalysisContechSimplified();
@@ -2616,6 +2679,29 @@ tStartCacheWarmed = clock();
     }
     
     
+  
+#if 0
+    // This is not safe, as visiting the instruction could lower it and free I.
+DEBUG(
+    if (!isa<CallInst>(I) && !isa<InvokeInst>(I) && 
+        I.getType() != Type::VoidTy) {
+      dbgs() << "  --> ";
+      const GenericValue &Val = SF.Values[&I];
+      switch (I.getType()->getTypeID()) {
+      default: llvm_unreachable("Invalid GenericValue Type");
+      case Type::VoidTyID:    dbgs() << "void"; break;
+      case Type::FloatTyID:   dbgs() << "float " << Val.FloatVal; break;
+      case Type::DoubleTyID:  dbgs() << "double " << Val.DoubleVal; break;
+      case Type::PointerTyID: dbgs() << "void* " << intptr_t(Val.PointerVal);
+        break;
+      case Type::IntegerTyID: 
+        dbgs() << "i" << Val.IntVal.getBitWidth() << " "
+               << Val.IntVal.toStringUnsigned(10)
+               << " (0x" << Val.IntVal.toStringUnsigned(16) << ")\n";
+        break;
+      }
+    });
+#endif
   }
   
   delete(Analyzer);
