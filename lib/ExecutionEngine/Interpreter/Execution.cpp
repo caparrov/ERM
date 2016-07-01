@@ -264,15 +264,6 @@ bool > ReportOnlyPerformance ("report-only-performance",
                               ("Reports only performance (op count and span)"),
                               cl::init (false));
 
-static
-cl::opt <
-bool > ReportOnlyPerformance ("report-only-performance",
-                              cl::desc
-                              ("Reports only performance (op count and span)"),
-                              cl::init (false));
-
-
-
 
 //===----------------------------------------------------------------------===//
 //                     Various Helper Functions
@@ -2579,6 +2570,7 @@ void Interpreter::run() {
     
     
     if (isTargetFunction==true && startAnalysis==false) {
+	tStartCacheWarmed = clock();
       startAnalysis = true;
     }
     

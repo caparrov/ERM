@@ -5372,21 +5372,16 @@ DynamicAnalysis::analyzeInstruction (Instruction & I, ExecutionContext & SF, Gen
           
           
           DebugLoc Loc = I.getDebugLoc(); // Here I is an LLVM instruction
-          unsigned Line = Loc.getLine();
+
           
           
-          if(Line != 0){
-            dbgs()<<  I<< " ("<< &I <<")\n";
-            dbgs() << "Line "<<Line <<"\n";
-          }
           
           if (MDNode *N = I.getMetadata("dbg")) {  // Here I is an LLVM instruction
             
             DILocation Loc(N);                      // DILocation is in DebugInfo.h
             SourceCodeLine = Loc.getLineNumber();
             if(SourceCodeLine != 0){
-              dbgs()<<  I<< " ("<< &I <<")\n";
-              dbgs() << "SourceCodeLine "<<SourceCodeLine <<"\n";
+              DEBUG(dbgs() << "SourceCodeLine "<<SourceCodeLine <<"\n");
             }
           }else{
             // Cannot get metadata of the instruction
