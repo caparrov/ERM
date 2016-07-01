@@ -45,7 +45,7 @@
 
 
 //#define DEBUG_SOURCE_CODE_LINE_ANALYSIS
-//#define PRINT_DEPENDENCIES
+#define PRINT_DEPENDENCIES
 #define DEBUG_MEMORY_TRACES
 #define DEBUG_REUSE_DISTANCE
 #define DEBUG_GENERIC
@@ -788,7 +788,7 @@ unsigned GetOneToAllOverlapCyclesFinal(vector < int >&ResourcesVector, bool Issu
   
   
   uint64_t getInstructionValueIssueCycle(Value* v);
-  uint64_t getInstructionValueInstance(Value* v);
+  int64_t getInstructionValueInstance(Value* v);
   void increaseInstructionValueInstance(Value* v);
   uint64_t getCacheLineLastAccess(uint64_t v);
   CacheLineInfo getCacheLineInfo(uint64_t v);
