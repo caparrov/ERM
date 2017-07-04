@@ -3,6 +3,8 @@
 
 
 # ERM flow
+![Alt text](./images/erm-execution-flow-steps.pdf?raw=true "Optional Title")
+
 [![](./images/erm-execution-flow-steps.pdf)](./images/erm-execution-flow-steps.pdf)
 
 
