@@ -9,7 +9,7 @@
 #ifndef LLVM_SUPPORT_DYNAMIC_ANALYSIS_H
 #define LLVM_SUPPORT_DYNAMIC_ANALYSIS_H
 
-#define INTERPRETER
+//#define INTERPRETER
 //#define EFF_TBV
 
 #include "../../../lib/ExecutionEngine/Interpreter/Interpreter.h"
@@ -21,10 +21,14 @@
 #include "llvm/Support/InstIterator.h"
 #include "llvm/Support/GetElementPtrTypeIterator.h"
 
+
+
 #ifdef INTERPRETER
 #include "llvm/Support/top-down-size-splay.hpp"
+//#include "llvm/Support/ValuesAnalysis.h"
 #else
 #include "top-down-size-splay.hpp"
+//#include "ValuesAnalysis.h"
 #endif
 
 //#define INT_FP_OPS
@@ -35,6 +39,17 @@
 #include <map>
 #include <stdarg.h>
 #include <stdio.h>
+#include <fstream>
+#include <string>
+#include <list>
+#include <vector>
+#include <cstdlib>
+
+
+
+//#include <boost/unordered_map.hpp>
+#include <map>
+
 
 #ifdef SOURCE_CODE_ANALYSIS
 #include <unordered_map>
@@ -45,7 +60,7 @@
 
 
 //#define DEBUG_SOURCE_CODE_LINE_ANALYSIS
-#define PRINT_DEPENDENCIES
+//#define PRINT_DEPENDENCIES
 #define DEBUG_MEMORY_TRACES
 #define DEBUG_REUSE_DISTANCE
 #define DEBUG_GENERIC
@@ -55,6 +70,7 @@
 //#define DEBUG_AGU
 //#define DEBUG_OOO_BUFFERS
 #define DEBUG_ISSUE_CYCLE
+#define DEBUG_POINTERS_TO_MEMORY
 //#define DEBUG_PHI_NODE
 //#define DEBUG_FUNCTION_CALL_STACK
 //#define DEBUG_PREFETCHER
@@ -64,7 +80,12 @@
 
 //#define ASSERT
 
+
+#define STORES_IN_REGISTER
 #define MOO_BUFFERS
+
+#define INTERMEDIATE_RESULTS_STACK
+
 
 /*The YMM registers are aliased over the older 128-bit XMM registers used for
  Intel SSE, treating the XMM registers as the lower half of the corresponding
@@ -99,10 +120,16 @@
 #define INT_ST_128_BITS  -1
 
 
-#define FP_ADD           0
-#define FP_SUB           0
-#define FP_MUL           0
-#define FP_DIV           0
+#define FP32_ADD           0
+#define FP64_ADD           0
+#define FP32_SUB           0
+#define FP64_SUB           0
+#define FP32_MUL           0
+#define FP64_MUL           0
+#define FP32_FMA           0
+#define FP64_FMA           0
+#define FP32_DIV           0
+#define FP64_DIV           0
 #define FP_REM          -1
 #define FP_LD_16_BITS    1
 #define FP_LD_32_BITS    1
@@ -116,14 +143,56 @@
 #define FP_ST_128_BITS   1
 #define MISC_MEM        -1
 #define CTRL            -1
-#define FP_SHUFFLE       0
+#define FP32_SHUFFLE       0
+#define FP64_SHUFFLE       0
+#define FP64_MOV       	   0
+#define FP32_MOV           0
+#define FP32_BLEND         0
+#define FP64_BLEND         0
+
 #define MISC            -1
 
 
 
 
 
+// =================== ARM Cortex A9 config ================================//
+
+/*
+
+#define ARM_CORTEX_A9_EXECUTION_UNITS 6
+#define ARM_CORTEX_DISPATCH_PORTS 2
+#define ARM_CORTEX_BUFFERS 5
+#define ARM_CORTEX_AGUS 0
+#define ARM_CORTEX_LOAD_AGUS 0
+#define ARM_CORTEX_STORE_AGUS 0
+
+
+#define ARM_CORTEX_N_COMP_EXECUTION_UNITS 4
+#define ARM_CORTEX_N_MEM_EXECUTION_UNITS 5
+#define ARM_CORTEX_N_AGUS 1
+
+#define ARM_CORTEX_FP_ADDER  0
+#define ARM_CORTEX_FP_MULTIPLIER 1
+#define ARM_CORTEX_FP_DIVIDER  2
+#define ARM_CORTEX_FP_SHUFFLE  3
+#define ARM_CORTEX_L1_LOAD_CHANNEL 4
+#define ARM_CORTEX_L1_STORE_CHANNEL  5
+#define ARM_CORTEX_L2_LOAD_CHANNEL 6
+#define ARM_CORTEX_L2_STORE_CHANNEL  7
+#define ARM_CORTEXM_L3_LOAD_CHANNEL 8
+#define ARM_CORTEX_L3_STORE_CHANNEL  9
+#define ARM_CORTEX_MEM_LOAD_CHANNEL 10
+#define ARM_CORTEX_MEM_STORE_CHANNEL  11
+#define ARM_CORTEX_ADDRESS_GENERATION_UNIT 12
+#define ARM_CORTEX_STORE_ADDRESS_GENERATION_UNIT 13
+#define ARM_CORTEX_LOAD_ADDRESS_GENERATION_UNIT 14
+
+*/
+
+
 // =================== Atom config ================================//
+/*
 
 
 #define ATOM_EXECUTION_UNITS 6
@@ -153,9 +222,11 @@
 #define ATOM_ADDRESS_GENERATION_UNIT 12
 #define ATOM_STORE_ADDRESS_GENERATION_UNIT 13
 #define ATOM_LOAD_ADDRESS_GENERATION_UNIT 14
+*/
 
 
 
+/*
 // =================== Generic config ================================//
 
 
@@ -187,27 +258,37 @@
 #define GENERIC_LOAD_ADDRESS_GENERATION_UNIT 14
 
 
+*/
 
-
-
-
-//===================== SANDY BRIDGE INSTRUCTION TYPES ========================//
-
-
+//===================== INSTRUCTION TYPES ========================//
 
 
 enum {
   
   // Arithmetic computation nodes
-  FP_ADD_NODE = 0,
-  FP_MUL_NODE,
-  FP_DIV_NODE,
+  FP32_ADD_NODE = 0,
+  FP64_ADD_NODE,
+
+  FP32_MUL_NODE,
+  FP64_MUL_NODE,
+
+  FP32_FMA_NODE,
+  FP64_FMA_NODE,
+
+  FP32_DIV_NODE,
+  FP64_DIV_NODE,
+
   
   
 // Vector nodes  
-  FP_SHUFFLE_NODE,
-  FP_BLEND_NODE,
-  FP_MOV_NODE,
+  FP32_SHUFFLE_NODE,
+  FP64_SHUFFLE_NODE,
+
+  FP32_BLEND_NODE,
+  FP64_BLEND_NODE,
+
+  FP32_MOV_NODE,
+  FP64_MOV_NODE,
   
 //Memory nodes
   REGISTER_LOAD_NODE,
@@ -251,18 +332,33 @@ enum {
 };
 
 
-//===================== SANDY BRIDGE EXECUTION UNITS ========================//
+//===================== EXECUTION UNITS ========================//
 // Execution units are all those resources for which we have a cycle in
 // FullOccupacyTree
 
 
 enum {
-  FP_ADDER = 0,
-  FP_MULTIPLIER,
-  FP_DIVIDER,
-  FP_SHUFFLE_UNIT,
-  FP_BLEND_UNIT,
-  FP_MOV_UNIT,
+  FP32_ADDER = 0,
+  FP64_ADDER,
+
+  FP32_MULTIPLIER,
+  FP64_MULTIPLIER,
+
+  FP32_FMADDER,
+  FP64_FMADDER,
+
+  FP32_DIVIDER,
+  FP64_DIVIDER,
+
+  FP32_SHUFFLE_UNIT,
+  FP64_SHUFFLE_UNIT,
+
+  FP32_BLEND_UNIT,
+  FP64_BLEND_UNIT,
+
+  FP32_MOV_UNIT,
+  FP64_MOV_UNIT,
+
   
   REGISTER_LOAD_CHANNEL,
   REGISTER_STORE_CHANNEL = REGISTER_LOAD_CHANNEL,
@@ -310,6 +406,7 @@ enum {
 
 // These are execution units, o resources -> there is an available and
 // and full occupancy tree from them
+/*
 
 #define SANDY_BRIDGE_EXECUTION_UNITS MEM_STORE_CHANNEL+1
 #define SANDY_BRIDGE_NODES TOTAL_NODES+1
@@ -331,6 +428,33 @@ enum {
 #define SANDY_BRIDGE_LOAD_AGUS 0
 #define SANDY_BRIDGE_STORE_AGUS 0
 #define SANDY_BRIDGE_PREFETCH_NODES 3
+
+
+
+*/
+
+
+
+#define EXECUTION_UNITS MEM_STORE_CHANNEL+1
+#define NODES TOTAL_NODES+1
+
+#define ARITHMETIC_NODES 8 // ( ADD (SUB), MUL, FMA, DIV )*2 -> SP and DP
+#define ARITHMETIC_EXECUTION_UNITS 8
+
+#define MOV_NODES 6 // * 2
+#define MOV_EXECUTION_UNITS 6 // * 2, to consider single and double precision as separate nodes
+
+
+#define MEM_NODES 10 // Before 8, we add 1 for register file size
+#define MEM_EXECUTION_UNITS 6  // Before 5
+
+
+#define DISPATCH_PORTS 6
+#define BUFFERS 5
+#define AGUS 2
+#define LOAD_AGUS 0
+#define STORE_AGUS 0
+#define PREFETCH_NODES 3
 
 
 
@@ -361,6 +485,81 @@ using namespace ComplexSplayTree;
 static const unsigned SplitTreeRange = 131072;
 //static const unsigned SplitTreeRange = 262144;
 //static const int SplitTreeRange = 32768;
+
+
+
+/*
+bool operator< ( PointerToMemory a, PointerToMemory b );
+bool operator== ( PointerToMemory a, PointerToMemory b );
+*/
+// LessThanComparable: necessary for implementing a map with a PointerToMemory struct as a key
+
+
+/*
+bool operator==(const PointerToMem &lhs, const PointerToMem &rhs)
+{
+  return lhs.BasePointer == rhs.BasePointer && lhs.ArrayOffset == rhs.ArrayOffset && lhs.WithinArrayOffset == rhs.WithinArrayOffset ;
+}
+
+std::size_t hash_value(const PointerToMem &a)
+{
+  std::size_t seed = 0;
+  boost::hash_combine(seed, a.BasePointer);
+  boost::hash_combine(seed, a.ArrayOffset);
+  boost::hash_combine(seed, a.WithinArrayOffset);
+  return seed;
+}
+
+*/
+
+
+
+// ==================================================================================================
+//  Data structures definitions for tracking pointer to memory
+//===================================================================================================
+
+struct PointerToMemory{
+	Value * BasePointer;
+	Value * Offset1;
+	Value * Offset2;
+	Value * Offset3;
+};
+struct PointerToMemoryInstance{
+	int64_t PTMindex;
+	int64_t IterationCount;
+};
+
+struct InstructionValue{
+	Value * v;
+	unsigned valueRep;
+};
+
+
+struct InstructionValueInstance{
+//	/InstructionValue IV;
+	Value * v;
+	unsigned valueRep;
+	int64_t valueInstance;
+};
+
+
+
+struct InstructionValueInstanceInfo{
+	PointerToMemoryInstance PTMI;
+	uint64_t Address;
+	unsigned nUses;
+};
+
+bool operator <(const PointerToMemory& x, const PointerToMemory& y);
+
+bool operator <(const InstructionValueInstance& x, const InstructionValueInstance& y);
+
+
+
+// ==================================================================================================
+//  End of data structures definitions for tracking pointer to memory
+//===================================================================================================
+
 
 struct CacheLineInfo{
   uint64_t IssueCycle;
@@ -544,9 +743,10 @@ public:
   vector<string> ResourcesNames;
   vector<string> NodesNames;
   
+  string OutputDir;
   
-  unsigned NRegisterSpills;
-  
+  unsigned NRegisterSpillsLoads;
+  unsigned NRegisterSpillsStores;
   
   bool LimitILP;
   bool LimitMLP;
@@ -581,6 +781,7 @@ vector<pair<uint64_t,uint64_t> > DispatchToLoadBufferQueueTreeCyclesToRemove;
   bool ConstraintPortsx86;
   bool BlockPorts;
   bool ConstraintAGUs;
+  bool FloatPrecision;
   unsigned PrefetchLevel;
   unsigned PrefetchDispatch;
   unsigned PrefetchTarget;
@@ -600,14 +801,16 @@ vector<pair<uint64_t,uint64_t> > DispatchToLoadBufferQueueTreeCyclesToRemove;
   string TargetFunction;
   uint8_t FunctionCallStack;
 
-bool VectorCode;
+  bool VectorCode;
+  bool SinglePrecisionCode;
+  bool DoublePrecisionCode;
   
-  
-  uint8_t uarch;
+ // uint8_t uarch;
   
   unsigned SourceCodeLine;
   
   int rep;
+  uint64_t globalAddrForArtificialMemOps;
   
 #ifdef INT_FP_OPS
   // Begin new
@@ -707,17 +910,40 @@ unsigned GetOneToAllOverlapCyclesFinal(vector < int >&ResourcesVector, bool Issu
   //---------------- CONTECH----------------------
 
   
+
+  void checkUnique();
   //Statistics
   double AverageILP;
   
-  
-  map <Value*, uint64_t> InstructionValueInstanceMap;
+
+  //map <InstructionValueInstance, InstructionValueInstanceInfo> InstructionValueInstanceMap;
+  map <InstructionValueInstance, uint64_t> InstructionValueInstanceMap;
+  map <InstructionValue, int64_t> InstructionValueMap;
+  map <uint64_t,PointerToMemoryInstance> AddressMap;
+
+  vector <PointerToMemory> PointersToMemoryGlobalVector;
+  vector <InstructionValueInstanceInfo> InstructionValueInstanceInfoGlobalVector;
+
+/*
+  map <PointerToMemory, vector< pair < InstructionValue, int64_t >>> PointerToMemoryInstructionsMap;
+  map <PointerToMemory, uint64_t> PointerToMemoryAddressMap;
+
+  map <Value*, vector< pair < Value*, uint64_t >>> PointerToMemoryInstructionsMap;
+  map <Value*, uint64_t> PointerToMemoryAddressMap;
+*/
+
+  //map <Value*, int64_t> InstructionValueInstanceMap;
+  map <Value*, Value*> InstructionValueInstructionNameMap;
   map <Value*, uint64_t> InstructionValueIssueCycleMap;
   map <uint64_t , CacheLineInfo> CacheLineIssueCycleMap;
   map <uint64_t , uint64_t> MemoryAddressIssueCycleMap;
   
 
+#ifdef INTERMEDIATE_RESULTS_STACK
+  deque<PointerToMemoryInstance> ReuseStack;
+#else
   deque<uint64_t> ReuseStack;
+#endif
   Tree<uint64_t> * ReuseTree;
   Tree<uint64_t> * PrefetchReuseTree;
   uint64_t PrefetchReuseTreeSize;
@@ -767,18 +993,71 @@ unsigned GetOneToAllOverlapCyclesFinal(vector < int >&ResourcesVector, bool Issu
                   bool ReportOnlyPerformance,
                   unsigned PrefetchLevel,
                   unsigned PrefetchDispatch,
-                  unsigned PrefetchTarget);
+                  unsigned PrefetchTarget,
+				  string OutputDir,
+				  bool FloatPrecision);
   
   
   
   vector<Instruction*> instructionPool;
   
   
+// ==================================================================================================
+// 	FUNCTIONS for tracking pointers to memory - Implemented in ValuesAnalysis
+//===================================================================================================
+
+  void removePointerToMemoryInGlobalVector(int64_t PTMindex);
+  int64_t insertPointerToMemoryInGlobalVector(PointerToMemory PTM);
+
+  void printInstructionValueInstance(InstructionValueInstance IVI);
+  void printPointerToMemoryInstance(PointerToMemoryInstance PTMI);
+  void insertInstructionValueInstanceInfo(InstructionValueInstance IVI, InstructionValueInstanceInfo IVII);
+  InstructionValueInstanceInfo getInstructionValueInstanceInfo(InstructionValueInstance IVI);
+  InstructionValueInstanceInfo getInstructionValueInstanceInfo(int64_t Address);
+  bool insertUsesOfPointerToMemory(Value * v, PointerToMemoryInstance PTMI, bool recursiveCall = false);
+  PointerToMemoryInstance managePointerToMemory(Instruction & I, unsigned valueRep, int64_t valueInstance, uint64_t & addr, unsigned OpCode, bool WarmRun, bool forceAnalyze);
+  unsigned adjustMemoryAddress(unsigned addr, unsigned addrFound, bool forceAnalyze);
+  void resetInstructionValueMap();
+  PointerToMemoryInstance getPointerToMemoryInstance(uint64_t address);
+  int64_t getInstructionValueInstance(InstructionValue instValue);
+  int64_t insertInstructionValueInstanceInfoGlobalVector(InstructionValueInstanceInfo IVII);
+  uint64_t getInstructionValueInstanceInfoGlobalVectorIndex(PointerToMemoryInstance PTMI);
+  int64_t getInstructionValueInstanceInfoGlobalVectorIndex(InstructionValueInstance IVI);
+
+  InstructionValueInstance getInstructionValueInstance(PointerToMemoryInstance PTMI);
+  InstructionValueInstance getInstructionValueInstance(uint64_t MemoryAddress);
+  void increaseInstructionValueInstance(InstructionValue v);
+  void printInstructionValue(InstructionValue IV);
+  void printPointerToMemory (PointerToMemory ptrmem);
+  void printPointerToMemoryGlobalVector();
+  void printInstructionValueInstanceInfo(InstructionValueInstanceInfo IVII);
+  void printInstructionValueInstanceMap();
+  void printAddressMap();
+  void printInstructionValueInstanceInfoGlobalVector();
+  void insertAddressMap(uint64_t Address, PointerToMemoryInstance PTMI);
+  void setAddress(uint64_t InstructioValueInfoIndex, uint64_t Address);
+  void mergeAddressMap();
+
+  PointerToMemoryInstance getPointerToMemoryToInsertInRegisterStack(Value * I, int64_t valueInstance, bool intermediateResult);
+  void insertIntermediateResultInRegisterStack(PointerToMemoryInstance PTMI, Instruction & currentInstruction, bool WarmRun, bool isSpill = false);
+  int RegisterStackReuseDistance(PointerToMemoryInstance address, Instruction & CurrentInst, bool WarmRun,  bool isSpill);
+  void insertRegisterStack(PointerToMemoryInstance address, Instruction & CurrentInst, bool warmRun);
+  void removeRegisterStack(PointerToMemoryInstance address);
+  void printRegisterStack();
+
+  void increaseNUses(PointerToMemoryInstance PTMI);
+  void decreaseNUses(PointerToMemoryInstance PTMI);
+
+  // ==================================================================================================
+  // 	OTHER FUNCTIONS
+  //===================================================================================================
+
+
   void analyze();
 #ifdef INTERPRETER
-  void analyzeInstruction(Instruction &I, ExecutionContext &SF,  GenericValue * visitResult);
+  void analyzeInstruction(Instruction &I, ExecutionContext &SF,  GenericValue * visitResult, unsigned valueRep = 0);
 #else
-  void analyzeInstruction (Instruction &I, unsigned OpCode, uint64_t addr, unsigned SourceCodeLine, bool forceAnalyze = false);
+  void analyzeInstruction (Instruction &I, unsigned OpCode, uint64_t addr, unsigned SourceCodeLine, bool forceAnalyze = false, unsigned VectorWidth = 1, unsigned valueRep = 0, bool lastValue= true, bool isSpill = false);
 #endif
   
   void insertInstructionValueIssueCycle(Value* v,uint64_t InstructionIssueCycle, bool isPHINode = 0 );
@@ -787,13 +1066,43 @@ unsigned GetOneToAllOverlapCyclesFinal(vector < int >&ResourcesVector, bool Issu
   void insertMemoryAddressIssueCycle(uint64_t v,uint64_t Cycle );
   
   
+  unsigned getLastRepetitionIntrinsic(string functionName);
+  void getOperandsPositionsIntrinsic(string functionName, vector<unsigned> & positions);
+  unsigned getStoreOperandPositionIntrinsic(string functionName);
+
   uint64_t getInstructionValueIssueCycle(Value* v);
-  int64_t getInstructionValueInstance(Value* v);
-  void increaseInstructionValueInstance(Value* v);
+  void insertInstructionValueName (Value * v);
+  void insertUseInPointerToMemoryInstructions(PointerToMemory ptrmem, InstructionValue v, int64_t valueInstance);
+  void printInstructionValueNames();
+  void printInstructionValueInstances();
   uint64_t getCacheLineLastAccess(uint64_t v);
   CacheLineInfo getCacheLineInfo(uint64_t v);
   uint64_t getMemoryAddressIssueCycle(uint64_t v);
-  
+
+  void printPointerToMemoryAddressMap();
+  void printPointerToMemoryInstructionsMap();
+
+
+
+
+
+  unsigned adjustMemoryAddress(PointerToMemory v, unsigned addr, bool forceAnalyze);
+  Value * getLastUsePhiNode(Value * phiNodeValue);
+  void getOriginalIncomingEdgesPhiNode(PHINode * phiNode, vector<Value *>&  originalIncomingEdges);
+///  vector<PointerToMemory> getPointerToMemoryToInsertInRegisterStack(Value * I, int64_t valueInstance, bool intermediateResults);
+  PointerToMemory getPointerToMemoryAddress(uint64_t Address);
+  void insertPointerToMemoryAddress(PointerToMemory ptrmem, uint64_t Address);
+  void insertConditionalPointerToMemoryAddress(PointerToMemory ptrmem, uint64_t Address);
+  void insertPointerToMemoryInstructions(Value * v,unsigned valueRep,   PointerToMemory ptrmemOperand = {NULL, NULL, NULL}, bool isGetElementPtr = false);
+  void insertPointerToMemoryInstructionsBitCast(Instruction &I, unsigned valueRep);
+  PointerToMemory  getPointerToMemoryInstructions(Value * v, unsigned valueRep, int64_t valueInstance);
+/*
+  void insertPointerToMemoryAddress(Value * v, uint64_t Address);
+  void insertConditionalPointerToMemoryAddress(Value * v, uint64_t Address);
+  void insertPointerToMemoryInstructions(Value * v, Value * vOperand = NULL, bool isGetElementPtr = false);
+  void insertPointerToMemoryInstructionsBitCast(Instruction &I);
+  Value *  getPointerToMemoryInstructions(Value * v);
+*/
   unsigned  GetInstructionTypeFromPrefetchType(unsigned PrefetchType);
   
   
@@ -808,8 +1117,9 @@ unsigned GetOneToAllOverlapCyclesFinal(vector < int >&ResourcesVector, bool Issu
   float GetEffectiveThroughput(unsigned ExecutionResource, unsigned AccessWidth, unsigned NElementsVector);
   unsigned GetIssueCycleGranularity(unsigned ExecutionResource, unsigned AccessWidth, unsigned NElementsVector);
   unsigned GetNodeWidthOccupancy(unsigned ExecutionResource, unsigned AccessWidth, unsigned NElementsVector);
-  bool GetLevelFull(unsigned ExecutionResource, unsigned NodeIssueOccupancy, unsigned NodeWidthOccupancy);
-  
+  bool GetLevelFull(unsigned ExecutionResource, unsigned AccessWidth, unsigned NElementsVector, unsigned NodeIssueOccupancy, unsigned NodeWidthOccupancy, bool potentiallyFull = false);
+  bool GetEnoughWidthOccupancy(unsigned ExecutionResource, unsigned NodeWidth, unsigned AccessWidth, unsigned NElementsVector);
+
   vector<unsigned> IssuePorts;
 
   //Returns the DAG level occupancy after the insertion
@@ -851,7 +1161,7 @@ unsigned GetOneToAllOverlapCyclesFinal(vector < int >&ResourcesVector, bool Issu
   
   
   unsigned GetMemoryInstructionType(int ReuseDistance, uint64_t MemoryAddress,bool isLoad=true);
-  unsigned GetExtendedInstructionType(int OpCode, int ReuseDistance=0, int RegisterStackReuseDistance = -1);
+  unsigned GetExtendedInstructionType(Instruction &I, int OpCode, int ReuseDistance=0, int RegisterStackReuseDistance = -1);
   unsigned GetPositionSourceCodeLineInfoVector(uint64_t Resource);
   
   uint64_t GetMinIssueCycleReservationStation();
@@ -907,7 +1217,19 @@ unsigned GetOneToAllOverlapCyclesFinal(vector < int >&ResourcesVector, bool Issu
   void PrintDispatchToLoadBuffer();
   void PrintDispatchToLineFillBuffer();
   
-  int RegisterStackReuseDistance(uint64_t address);
+#ifdef INTERMEDIATE_RESULTS_STACK
+
+
+//  int RegisterStackReuseDistance(PointerToMemory address, Instruction & CurrentInst);
+//  void insertRegisterStack(PointerToMemory address, Instruction & CurrentInst, bool warmRun);
+
+  //void insertIntermediateResultInRegisterStack(Value * I,  int64_t valueInstance, Instruction & currentInstruction, bool WarmWun);
+  int64_t insertOperandsInRegisterStack(unsigned operandPosition, Instruction & I, bool WarmCache, unsigned Line);
+  void removeOperandsInRegisterStack(unsigned i, Instruction & I, bool WarmRun, unsigned Line);
+#else
+  int RegisterStackReuseDistance(uint64_t address, bool WarmCache, bool insert = true);
+  void insertRegisterStack(uint64_t address);
+#endif
   int ReuseDistance(uint64_t Last, uint64_t Current, uint64_t address, bool FromPrefetchReuseTree = false);
   int ReuseTreeSearchDelete(uint64_t Current, uint64_t address,  bool FromPrefetchReuseTree = false);
   //int ReuseTreeSearchDelete(uint64_t Last, bool FromPrefetchReuseTree = false);
@@ -925,5 +1247,8 @@ unsigned GetOneToAllOverlapCyclesFinal(vector < int >&ResourcesVector, bool Issu
   int getInstructionType(Instruction &I);
   int getInstructionComputationDAGNode(Instruction &I);
   
+  void dumpList(std::list< double > const & l, string const & filename);
+
+
 };
 #endif
